@@ -1,1 +1,13 @@
-version: "2"
+version: "3"
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: bb_user
+      POSTGRES_PASSWORD: pswd
+      POSTGRES_DB: big_brother
+  app:
+    image: default/bootcamp-big-brother
+    depends_on:
+      - db

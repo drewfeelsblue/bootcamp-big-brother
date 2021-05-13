@@ -9,7 +9,7 @@ import pureconfig.generic.auto.exportReader
 import pureconfig.ConfigSource
 
 case class DbConfig(
-    dbHost: DbConfig.Host,
+    dbHost: String,
     dbPort: DbConfig.Port,
     dbUser: NonEmptyString,
     dbPassword: NonEmptyString,

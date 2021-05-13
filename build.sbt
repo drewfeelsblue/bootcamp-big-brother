@@ -36,5 +36,7 @@ libraryDependencies ++= Seq(
   http4sServer,
   pureConfig,
   refined,
-  refinedPureConfig
+  refinedPureConfig,
+  skunkCore,
+  skunkCirce
 )

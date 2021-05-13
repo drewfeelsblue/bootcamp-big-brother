@@ -6,6 +6,7 @@ object Dependencies {
     val http4s     = "0.21.13"
     val pureConfig = "0.15.0"
     val refined    = "0.9.24"
+    val skunk      = "0.0.26"
 
     val betterMonadicFor = "0.3.1"
     val kindProjector    = "0.11.3"
@@ -17,6 +18,9 @@ object Dependencies {
     val catsEffect = "org.typelevel"         %% "cats-effect" % Versions.catsEffect
     val pureConfig = "com.github.pureconfig" %% "pureconfig"  % Versions.pureConfig
 
+    val skunkCore  = "org.tpolecat" %% "skunk-core"  % Versions.skunk
+    val skunkCirce = "org.tpolecat" %% "skunk-circe" % Versions.skunk
+
     val http4sDsl    = http4s("http4s-dsl")
     val http4sServer = http4s("http4s-blaze-server")
     val http4sClient = http4s("http4s-blaze-client")
@@ -24,7 +28,6 @@ object Dependencies {
 
     val refined           = refinedModule("refined")
     val refinedPureConfig = refinedModule("refined-pureconfig")
-
   }
 
   object CompilerPlugins {
