@@ -7,14 +7,14 @@ case class AppResources[F[_]](psql: Resource[F, Session[F]])
 
 object AppResources {
   def make[F[_]: Concurrent: ContextShift](dbConfig: DbConfig): Resource[F, AppResources[F]] = {
-    val DbConfig(dbHost, dbPort, dbUser, dbPassword, database, maxSessions) = dbConfig
+    val DbConfig(host, port, user, password, databaseName, maxSessions) = dbConfig
     Session
       .pooled(
-        dbHost,
-        dbPort.value,
-        dbUser.value,
-        database.value,
-        Some(dbPassword.value),
+        host.value,
+        port.value,
+        user.value,
+        databaseName.value,
+        Some(password.value),
         maxSessions.value
       )
       .map(AppResources.apply)

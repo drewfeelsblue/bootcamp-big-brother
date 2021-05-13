@@ -8,6 +8,12 @@ object Dependencies {
     val refined    = "0.9.24"
     val skunk      = "0.0.26"
 
+    val postgresJdbc = "42.2.20"
+    val flyway       = "7.8.2"
+
+    val log4cats = "1.2.1"
+    val logback  = "1.2.3"
+
     val betterMonadicFor = "0.3.1"
     val kindProjector    = "0.11.3"
   }
@@ -21,6 +27,11 @@ object Dependencies {
     val skunkCore  = "org.tpolecat" %% "skunk-core"  % Versions.skunk
     val skunkCirce = "org.tpolecat" %% "skunk-circe" % Versions.skunk
 
+    val postgresJdbc = "org.postgresql" % "postgresql"  % Versions.postgresJdbc
+    val flyway       = "org.flywaydb"   % "flyway-core" % Versions.flyway
+
+    val log4cats = "org.typelevel" %% "log4cats-slf4j" % Versions.log4cats
+
     val http4sDsl    = http4s("http4s-dsl")
     val http4sServer = http4s("http4s-blaze-server")
     val http4sClient = http4s("http4s-blaze-client")
@@ -28,6 +39,8 @@ object Dependencies {
 
     val refined           = refinedModule("refined")
     val refinedPureConfig = refinedModule("refined-pureconfig")
+
+    val logback = "ch.qos.logback" % "logback-classic" % Versions.logback
   }
 
   object CompilerPlugins {

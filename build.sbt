@@ -29,6 +29,8 @@ docker / dockerfile := {
 libraryDependencies ++= Seq(
   compilerPlugin(`kind-projector`),
   compilerPlugin(`better-monadic-for`),
+  postgresJdbc,
+  flyway,
   catsEffect,
   http4sDsl,
   http4sCirce,
@@ -38,5 +40,7 @@ libraryDependencies ++= Seq(
   refined,
   refinedPureConfig,
   skunkCore,
-  skunkCirce
+  skunkCirce,
+  log4cats,
+  logback % Runtime
 )
