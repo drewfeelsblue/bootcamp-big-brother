@@ -1,6 +1,7 @@
 import cats.effect.{ ExitCode, IO, IOApp }
 import config.{ DbConfig, DbMigrationConfig }
 import migration.DbMigration
+import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import skunk.codec.all.text
 import skunk.implicits.toStringOps
@@ -16,6 +17,6 @@ object Main extends IOApp {
       version <- AppResources.make[IO](dbConfig).map(_.psql).use { psql =>
                   psql.use(_.unique(sql"SELECT version();".query(text)))
                 }
-      _ <- IO(println(version))
+      _ <- Logger[IO].info(version)
     } yield ExitCode.Success
 }

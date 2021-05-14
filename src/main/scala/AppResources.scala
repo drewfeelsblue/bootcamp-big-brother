@@ -14,7 +14,7 @@ object AppResources {
         port.value,
         user.value,
         databaseName.value,
-        Some(password.value),
+        Some(password.value.value),
         maxSessions.value
       )
       .map(AppResources.apply)

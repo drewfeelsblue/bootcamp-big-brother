@@ -17,10 +17,11 @@ case class DbConfig(
     host: NonEmptyString,
     port: DbConfig.Port,
     user: NonEmptyString,
-    password: NonEmptyString,
+    password: Secret[NonEmptyString],
     databaseName: NonEmptyString,
     maxSessions: DbConfig.MaxSessionsNumber
-)
+) extends DetailedToString
+
 object DbConfig {
   private val path = "db"
   type Port              = Int Refined Interval.Closed[1000, 9999]
@@ -30,6 +31,6 @@ object DbConfig {
     for {
       config <- Sync[F].delay(ConfigFactory.load().getConfig(path))
       dbConfig <- Sync[F].delay(ConfigSource.fromConfig(config).loadOrThrow[DbConfig])
-      _ <- Logger[F].info(s"Database config loaded: $dbConfig")
+      _ <- Logger[F].info(s"Database config loaded($dbConfig)")
     } yield dbConfig
 }
