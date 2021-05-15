@@ -1,4 +1,6 @@
-import cats.effect.{ Concurrent, ContextShift, Resource }
+package resources
+
+import cats.effect.{Concurrent, ContextShift, Resource}
 import config.DbConfig
 import natchez.Trace.Implicits.noop
 import skunk.Session

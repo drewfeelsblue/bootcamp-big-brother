@@ -15,6 +15,11 @@ scalacOptions ++= Seq(
 
 enablePlugins(DockerPlugin)
 
+assembly / assemblyMergeStrategy := {
+  case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
+  case _                                   => MergeStrategy.first
+}
+
 docker / dockerfile := {
   val artifact: File     = assembly.value
   val artifactTargetPath = s"/app/${artifact.name}"
@@ -41,6 +46,9 @@ libraryDependencies ++= Seq(
   refinedPureConfig,
   skunkCore,
   skunkCirce,
+  newType,
+  slack,
+  jackson,
   log4cats,
   logback % Runtime
 )
