@@ -1,7 +1,7 @@
 package http.routes
 
 import cats.data.EitherT
-import cats.effect.{ IO, Sync }
+import cats.effect.Sync
 import cats.implicits.toBifunctorOps
 import cats.{ Applicative, Defer, Monad, MonadError }
 import cats.syntax.functor._
@@ -34,6 +34,7 @@ final case class CommandRoutes[F[_]: Monad: Defer: Sync]()(implicit me: MonadErr
   import SlashCommandOptions._
   private val parser = new SlashCommandPayloadParser()
 
+  //TODO Either.catchNonFatal
   implicit def slashCommandPayloadDecoder[F[_]: Sync: Applicative]: EntityDecoder[F, SlashCommandPayload] =
     EntityDecoder.text[F].flatMapR[SlashCommandPayload] { s =>
       EitherT.fromEither(Try(parser.parse(s)).toEither.leftMap { th =>

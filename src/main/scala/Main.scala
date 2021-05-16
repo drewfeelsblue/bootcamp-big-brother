@@ -1,6 +1,7 @@
 import cats.effect.{ Concurrent, ExitCode, IO, IOApp }
+import cats.implicits.toSemigroupKOps
 import config.{ DbConfig, DbMigrationConfig, HttpServerConfig, Loader }
-import http.routes.CommandRoutes
+import http.routes.{ ActionRoutes, CommandRoutes }
 import migration.DbMigration
 import org.http4s.HttpApp
 import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
@@ -19,7 +20,12 @@ object Main extends IOApp {
 //      _ <- Loader[IO, DbConfig]("db")
       dbMigrationConfig <- Loader[IO, DbMigrationConfig]("db.migration")
       _ <- DbMigration.migrate[IO](dbMigrationConfig)
-      _ <- HttpServer.resource(httpServerConfig, loggers[IO].apply(CommandRoutes[IO]().httpRoutes.orNotFound)).use(_ => IO.never)
+      _ <- HttpServer
+            .resource(
+              httpServerConfig,
+              loggers[IO].apply((CommandRoutes[IO]().httpRoutes <+> ActionRoutes[IO]().httpRoutes).orNotFound)
+            )
+            .use(_ => IO.never)
     } yield ExitCode.Success
 
   def loggers[F[_]: Concurrent]: HttpApp[F] => HttpApp[F] = { http: HttpApp[F] =>
