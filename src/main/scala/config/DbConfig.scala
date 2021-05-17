@@ -2,7 +2,7 @@ package config
 
 import eu.timepit.refined.types.string.NonEmptyString
 
-case class DbConfig(
+final case class DbConfig(
     host: NonEmptyString,
     port: Port,
     user: NonEmptyString,

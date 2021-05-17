@@ -2,7 +2,7 @@ package config
 
 import eu.timepit.refined.types.string.NonEmptyString
 
-case class DbMigrationConfig(
+final case class DbMigrationConfig(
     url: NonEmptyString,
     user: NonEmptyString,
     password: Secret[NonEmptyString]

@@ -47,8 +47,8 @@ libraryDependencies ++= Seq(
   skunkCore,
   skunkCirce,
   newType,
-  slack,
-  jackson,
+  sttp,
+  slackMorphismClient,
   log4cats,
   logback % Runtime
 )
