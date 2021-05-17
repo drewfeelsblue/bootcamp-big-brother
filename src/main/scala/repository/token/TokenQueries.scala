@@ -1,8 +1,9 @@
 package repository.token
 
 import model.Domain.Token
-import repository.token.TokenCodecs.tokenCodec
-import skunk.Command
+import org.latestbit.slack.morphism.common.SlackTeamId
+import repository.token.TokenCodecs.{ teamIdCodec, tokenCodec }
+import skunk.{ Command, Query }
 import skunk.implicits.toStringOps
 
 object TokenQueries {
@@ -13,5 +14,12 @@ object TokenQueries {
          INSERT INTO #$tableName (team_id, type, value, user_id, scope)
          VALUES ${tokenCodec.values}
          """.command
+
+  def findByTeamId: Query[SlackTeamId, Token] =
+    sql"""
+         SELECT team_id, type, value, user_id, scope
+         FROM #$tableName
+         WHERE team_id = $teamIdCodec
+       """.query(tokenCodec)
 
 }

@@ -1,18 +1,12 @@
-import cats.effect.{ Concurrent, ExitCode, IO, IOApp }
-import cats.implicits.{ catsSyntaxTuple2Semigroupal, toSemigroupKOps }
+import cats.effect.{ ExitCode, IO, IOApp }
+import cats.implicits.catsSyntaxTuple2Semigroupal
 import config.{ DbConfig, DbMigrationConfig, HttpServerConfig, Loader, SlackAppConfig }
-import http.routes.{ ActionRoutes, CommandRoutes }
 import migration.DbMigration
-import org.http4s.HttpApp
-import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
-import org.http4s.server.middleware.{ RequestLogger, ResponseLogger }
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import eu.timepit.refined.pureconfig._
 import modules.{ HttpApi, Services }
 import pureconfig.generic.auto.exportReader
 import resources.{ AppResources, HttpServer, SlackClient }
-
-import java.net.http.HttpClient
 
 object Main extends IOApp {
   implicit val logger = Slf4jLogger.getLogger[IO]
