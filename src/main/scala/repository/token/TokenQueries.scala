@@ -13,7 +13,7 @@ object TokenQueries {
     sql"""
          INSERT INTO #$tableName (team_id, type, value, user_id, scope)
          VALUES ${tokenCodec.values}
-         """.command
+       """.command
 
   def findByTeamId: Query[SlackTeamId, Token] =
     sql"""

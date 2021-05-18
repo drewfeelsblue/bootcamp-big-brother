@@ -48,7 +48,7 @@ final case class OAuthRoutes[F[_]: Sync](
             }
             .foldF(_ => InternalServerError(), _ => Ok("Installed"))
         case (_, Some(_)) => Ok()
-        case _                => InternalServerError()
+        case _            => InternalServerError()
       }
   }
 }
