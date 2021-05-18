@@ -1,8 +1,10 @@
 import cats.implicits.toFunctorOps
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.{ Interval, Positive }
+import eu.timepit.refined.string.IPv4
 
 package object config {
+  type Host              = String Refined IPv4
   type Port              = Int Refined Interval.Closed[0, 65353]
   type MaxSessionsNumber = Int Refined Positive
 

@@ -1,7 +1,7 @@
 package domain
 
 import io.estatico.newtype.macros.newtype
-import org.latestbit.slack.morphism.common.SlackUserId
+import org.latestbit.slack.morphism.common.{ SlackChannelId, SlackUserId }
 
 object task {
 
@@ -11,6 +11,7 @@ object task {
   final case class Task(
       topic: Topic,
       title: Title,
+      channelId: SlackChannelId,
       creatorId: SlackUserId
   )
 }

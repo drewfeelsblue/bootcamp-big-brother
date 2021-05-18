@@ -10,13 +10,13 @@ object TaskQueries {
 
   val save: Command[Task] =
     sql"""
-         INSERT INTO #$tableName (topic, title, creator_id)
+         INSERT INTO #$tableName (topic, title, channel_id, creator_id)
          VALUES ${taskCodec.values}
        """.command
 
   val findByTopicAndTitle: Query[Topic ~ Title, Task] =
     sql"""
-         SELECT topic, title, creator_id
+         SELECT topic, title, channel_id, creator_id
          FROM #$tableName 
          WHERE topic = $topicCodec AND title = $titleCodec
        """.query(taskCodec)
