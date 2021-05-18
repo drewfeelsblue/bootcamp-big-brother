@@ -28,7 +28,7 @@ final case class OAuthRoutes[F[_]: Sync](
       val params = Map(
         "client_id" -> slackAppConfig.clientId.value,
         "scope" -> slackAppConfig.scope.value,
-        "redirect_id" -> slackAppConfig.redirectUrl.fold("")(_.value)
+        "redirect_id" -> slackAppConfig.redirectUrl.value
       )
       TemporaryRedirect(Location(SlackAuthUrlV2.withQueryParams(params)))
 
@@ -40,7 +40,7 @@ final case class OAuthRoutes[F[_]: Sync](
               slackAppConfig.clientId.value,
               slackAppConfig.clientSecret.value.value,
               oauthCode,
-              slackAppConfig.redirectUrl.map(_.value)
+              Some(slackAppConfig.redirectUrl.value)
             )
           ).semiflatTap { accessTokenResponse =>
               import accessTokenResponse._

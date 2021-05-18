@@ -7,5 +7,5 @@ final case class SlackAppConfig(
     clientSecret: Secret[NonEmptyString],
     signingSecret: Secret[NonEmptyString],
     scope: NonEmptyString,
-    redirectUrl: Option[NonEmptyString] = None
+    redirectUrl: NonEmptyString
 ) extends DetailedToString
