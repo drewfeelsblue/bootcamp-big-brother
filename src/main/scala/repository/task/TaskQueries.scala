@@ -1,8 +1,8 @@
 package repository.task
 
-import domain.task.Task
-import repository.task.TaskCodecs.taskCodec
-import skunk.Command
+import domain.task.{ Task, Title, Topic }
+import repository.task.TaskCodecs.{ taskCodec, titleCodec, topicCodec }
+import skunk.{ ~, Command, Query }
 import skunk.implicits.toStringOps
 
 object TaskQueries {
@@ -13,4 +13,11 @@ object TaskQueries {
          INSERT INTO #$tableName (topic, title, creator_id)
          VALUES ${taskCodec.values}
        """.command
+
+  val findByTopicAndTitle: Query[Topic ~ Title, Task] =
+    sql"""
+         SELECT topic, title, creator_id
+         FROM #$tableName 
+         WHERE topic = $topicCodec AND title = $titleCodec
+       """.query(taskCodec)
 }

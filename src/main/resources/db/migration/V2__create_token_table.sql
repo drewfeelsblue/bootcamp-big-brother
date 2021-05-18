@@ -6,5 +6,6 @@ create table if not exists big_brother.t_tokens
     value   text not null,
     user_id text not null,
     scope   text not null,
-    constraint t_tokens_id_pk primary key (id)
+    constraint t_tokens_id_pk primary key (id),
+    constraint t_tokens_team_id_value_uindex unique (team_id, value)
 );

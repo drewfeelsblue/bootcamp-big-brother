@@ -1,21 +1,23 @@
 package modules
 
 import cats.effect.{ Concurrent, Sync }
+import cats.implicits.toSemigroupKOps
 import config.SlackAppConfig
-import http.routes.OAuthRoutes
+import http.routes.{ CommandRoutes, OAuthRoutes }
 import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
 import org.http4s.server.middleware.Logger
 import org.latestbit.slack.morphism.client.SlackApiClientT
 
 final class HttpApi[F[_]: Sync: Concurrent] private (
     services: Services[F],
-    slackApiClientT: SlackApiClientT[F],
+    slackApiClient: SlackApiClientT[F],
     slackAppConfig: SlackAppConfig
 ) {
 
-  private val oauthRoutes = OAuthRoutes(slackApiClientT, services.tokens, slackAppConfig)
+  private val oauthRoutes   = OAuthRoutes(slackApiClient, services.tokens, slackAppConfig)
+  private val commandRoutes = CommandRoutes(services.tasks, slackApiClient)
 
-  val routes = Logger.httpApp(true, true)(oauthRoutes.routes.orNotFound)
+  val routes = Logger.httpApp(true, true)((oauthRoutes.routes <+> commandRoutes.routes).orNotFound)
 }
 
 object HttpApi {

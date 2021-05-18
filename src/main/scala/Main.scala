@@ -1,4 +1,5 @@
 import cats.effect.{ ExitCode, IO, IOApp }
+import cats.implicits.catsSyntaxTuple4Semigroupal
 import config.{ DbConfig, DbMigrationConfig, HttpServerConfig, Loader, SlackAppConfig }
 import migration.DbMigration
 import org.typelevel.log4cats.slf4j.Slf4jLogger
@@ -12,10 +13,12 @@ object Main extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] =
     for {
-      httpServerConfig <- Loader[IO, HttpServerConfig]("http.server")
-      dbConfig <- Loader[IO, DbConfig]("db")
-      slackAppConfig <- Loader[IO, SlackAppConfig]("slack")
-      dbMigrationConfig <- Loader[IO, DbMigrationConfig]("db.migration")
+      (httpServerConfig, dbConfig, slackAppConfig, dbMigrationConfig) <- (
+                                                                          Loader[IO, HttpServerConfig]("http.server"),
+                                                                          Loader[IO, DbConfig]("db"),
+                                                                          Loader[IO, SlackAppConfig]("slack"),
+                                                                          Loader[IO, DbMigrationConfig]("db.migration")
+                                                                        ).tupled
       _ <- DbMigration.migrate[IO](dbMigrationConfig)
       _ <- AppResources.make[IO](dbConfig).use {
             case AppResources(psql, slackClient) =>
