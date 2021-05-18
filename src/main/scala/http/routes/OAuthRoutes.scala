@@ -3,7 +3,7 @@ package http.routes
 import cats.data.EitherT
 import cats.effect.Sync
 import config.SlackAppConfig
-import model.Domain.Token
+import domain.token.Token
 import org.http4s.HttpRoutes
 import org.http4s._
 import org.http4s.dsl.Http4sDsl

@@ -2,7 +2,7 @@ package service
 
 import cats.effect.{ Resource, Sync }
 import cats.syntax.functor._
-import model.Domain.Token
+import domain.token.Token
 import org.latestbit.slack.morphism.common.SlackTeamId
 import repository.token.TokenQueries
 import skunk.Session

@@ -1,6 +1,6 @@
 package repository.token
 
-import model.Domain.Token
+import domain.token.Token
 import org.latestbit.slack.morphism.common.SlackTeamId
 import repository.token.TokenCodecs.{ teamIdCodec, tokenCodec }
 import skunk.{ Command, Query }

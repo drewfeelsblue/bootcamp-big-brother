@@ -1,5 +1,4 @@
 import cats.effect.{ ExitCode, IO, IOApp }
-import cats.implicits.catsSyntaxTuple2Semigroupal
 import config.{ DbConfig, DbMigrationConfig, HttpServerConfig, Loader, SlackAppConfig }
 import migration.DbMigration
 import org.typelevel.log4cats.slf4j.Slf4jLogger

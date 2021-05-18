@@ -1,13 +1,7 @@
 package repository.token
 
-import model.Domain.Token
-import org.latestbit.slack.morphism.common.{
-  SlackAccessTokenValue,
-  SlackApiTokenScope,
-  SlackApiTokenType,
-  SlackTeamId,
-  SlackUserId
-}
+import domain.token.Token
+import org.latestbit.slack.morphism.common.{SlackAccessTokenValue, SlackApiTokenScope, SlackApiTokenType, SlackTeamId, SlackUserId}
 import skunk.Codec
 import skunk.codec.all.text
 

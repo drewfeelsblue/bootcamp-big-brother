@@ -1,4 +1,4 @@
-package model
+package domain
 
 import org.latestbit.slack.morphism.common.{
   SlackAccessTokenValue,
@@ -8,7 +8,7 @@ import org.latestbit.slack.morphism.common.{
   SlackUserId
 }
 
-object Domain {
+object token {
   final case class Token(
       teamId: SlackTeamId,
       `type`: SlackApiTokenType,
