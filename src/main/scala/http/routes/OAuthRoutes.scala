@@ -46,9 +46,9 @@ final case class OAuthRoutes[F[_]: Sync](
               import accessTokenResponse._
               tokenService.save(Token(team.id, token_type, access_token, authed_user.id, scope))
             }
-            .foldF(_ => InternalServerError(), _ => Ok("Installed"))
-        case (_, Some(_)) => Ok()
-        case _            => InternalServerError()
+            .foldF(_ => InternalServerError(), _ => Ok("Application successfully installed"))
+        case (_, Some(error)) => Ok(s"Install application error: $error")
+        case _                => InternalServerError()
       }
   }
 }
