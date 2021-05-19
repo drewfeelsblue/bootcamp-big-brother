@@ -24,6 +24,13 @@ object TaskQueries {
          WHERE topic = $topicCodec AND title = $titleCodec AND channel_id = $channelCodec
        """.query(taskIdCodec ~ taskCodec)
 
+  val findById: Query[TaskId, Task] =
+    sql"""
+         SELECT topic, title, channel_id, creator_id
+         FROM #$tableName
+         WHERE id = $taskIdCodec
+       """.query(taskCodec)
+
   object codecs {
     val taskIdCodec: Codec[TaskId]          = int8
     val topicCodec: Codec[Topic]            = text

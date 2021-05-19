@@ -21,6 +21,7 @@ final case class CommandRoutes[F[_]: Sync](taskService: TaskService[F], slackApi
   implicit val slackApiEventMessageReplyEncoder: EntityEncoder[F, SlackApiEventMessageReply] = jsonEncoderOf
 
   val routes = CommandMiddleware {
+
     case Init(topic, title, channel, creator, responseUrl) =>
       (taskService.save(Task(topic, title, channel, creator)) >>= { taskId =>
         slackApiClient.events.reply(
@@ -32,6 +33,7 @@ final case class CommandRoutes[F[_]: Sync](taskService: TaskService[F], slackApi
           )
         )
       }) *> Ok()
+
     case SyntaxError => Ok(InitTaskMessage.fail)
   }
 }

@@ -1,14 +1,15 @@
 package service
 
-import cats.effect.{Resource, Sync}
+import cats.effect.{ Resource, Sync }
 import cats.syntax.flatMap._
-import domain.task.{Task, TaskId}
+import domain.task.{ Task, TaskId }
 import repository.TaskQueries
 import skunk.Session
 import skunk.implicits.toIdOps
 
 trait TaskService[F[_]] {
   def save(task: Task): F[TaskId]
+  def findById(taskId: TaskId): F[Option[Task]]
 }
 
 object TaskService {
@@ -25,5 +26,8 @@ object TaskService {
               case _             => savePreparedQuery.unique(task)
             }
       }
+
+    override def findById(taskId: TaskId): F[Option[Task]] =
+      sessionPool.flatMap(_.prepare(TaskQueries.findById)).use(_.option(taskId))
   }
 }

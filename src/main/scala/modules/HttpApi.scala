@@ -17,7 +17,7 @@ final class HttpApi[F[_]: Sync: Concurrent: org.typelevel.log4cats.Logger] priva
 
   private val oauthRoutes       = OAuthRoutes(slackApiClient, tokens, slackAppConfig)
   private val commandRoutes     = CommandRoutes(tasks, slackApiClient)
-  private val interactionRoutes = InteractionRoutes(tokens, responses, slackApiClient)
+  private val interactionRoutes = InteractionRoutes(tokens, tasks, responses, slackApiClient)
 
   val routes = Logger.httpApp(true, true)((oauthRoutes.routes <+> commandRoutes.routes <+> interactionRoutes.routes).orNotFound)
 }
