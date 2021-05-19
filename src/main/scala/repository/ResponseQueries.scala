@@ -8,9 +8,7 @@ import skunk.implicits.toStringOps
 import skunk.{ ~, Codec, Command, Query }
 
 object ResponseQueries {
-
   import codecs._
-
   private val tableName = "big_brother.t_responses"
 
   val save: Command[Response] =

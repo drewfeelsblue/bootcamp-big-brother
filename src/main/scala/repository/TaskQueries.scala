@@ -8,7 +8,6 @@ import skunk.{ ~, Codec, Query }
 
 object TaskQueries {
   import codecs._
-
   private val tableName = "big_brother.t_tasks"
 
   val save: Query[Task, TaskId] =
