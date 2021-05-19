@@ -1,13 +1,16 @@
-package repository.response
+package repository
 
 import domain.response.Response
 import domain.task.TaskId
 import org.latestbit.slack.morphism.common.SlackUserId
-import repository.response.ResponseCodecs.{ responseCodec, taskIdCodec, userIdCodec }
+import skunk.codec.all.{ int8, text }
 import skunk.implicits.toStringOps
-import skunk.{ ~, Command, Query }
+import skunk.{ ~, Codec, Command, Query }
 
 object ResponseQueries {
+
+  import codecs._
+
   private val tableName = "big_brother.t_responses"
 
   val save: Command[Response] =
@@ -22,4 +25,10 @@ object ResponseQueries {
          FROM #$tableName
          WHERE task_id = $taskIdCodec AND user_id = $userIdCodec
        """.query(responseCodec)
+
+  object codecs {
+    val taskIdCodec: Codec[TaskId]      = int8
+    val userIdCodec: Codec[SlackUserId] = text.imap(SlackUserId.apply)(_.value)
+    val responseCodec: Codec[Response]  = (taskIdCodec ~ userIdCodec).gimap[Response]
+  }
 }

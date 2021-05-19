@@ -1,11 +1,11 @@
 package service
 
-import cats.effect.{ Resource, Sync }
+import cats.effect.{Resource, Sync}
 import cats.syntax.functor._
 import cats.syntax.flatMap._
 import domain.token.Token
 import org.latestbit.slack.morphism.common.SlackTeamId
-import repository.token.TokenQueries
+import repository.TokenQueries
 import skunk.Session
 
 trait TokenService[F[_]] {

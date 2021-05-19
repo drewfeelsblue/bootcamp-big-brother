@@ -1,12 +1,14 @@
-package repository.task
+package repository
 
 import domain.task.{ Task, TaskId, Title, Topic }
-import org.latestbit.slack.morphism.common.SlackChannelId
-import repository.task.TaskCodecs.{ channelCodec, taskCodec, taskIdCodec, titleCodec, topicCodec }
-import skunk.{ ~, Query }
+import org.latestbit.slack.morphism.common.{ SlackChannelId, SlackUserId }
+import skunk.codec.all.{ int8, text }
 import skunk.implicits.toStringOps
+import skunk.{ ~, Codec, Query }
 
 object TaskQueries {
+  import codecs._
+
   private val tableName = "big_brother.t_tasks"
 
   val save: Query[Task, TaskId] =
@@ -22,4 +24,14 @@ object TaskQueries {
          FROM #$tableName 
          WHERE topic = $topicCodec AND title = $titleCodec AND channel_id = $channelCodec
        """.query(taskIdCodec ~ taskCodec)
+
+  object codecs {
+    val taskIdCodec: Codec[TaskId]          = int8
+    val topicCodec: Codec[Topic]            = text
+    val titleCodec: Codec[Title]            = text
+    val channelCodec: Codec[SlackChannelId] = text.imap(SlackChannelId.apply)(_.value)
+    val creatorCodec: Codec[SlackUserId]    = text.imap(SlackUserId.apply)(_.value)
+
+    val taskCodec: Codec[Task] = (topicCodec ~ titleCodec ~ channelCodec ~ creatorCodec).gimap[Task]
+  }
 }

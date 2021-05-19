@@ -1,9 +1,9 @@
 package service
 
-import cats.effect.{ Resource, Sync }
+import cats.effect.{Resource, Sync}
 import cats.syntax.flatMap._
-import domain.task.{ Task, TaskId }
-import repository.task.TaskQueries
+import domain.task.{Task, TaskId}
+import repository.TaskQueries
 import skunk.Session
 import skunk.implicits.toIdOps
 

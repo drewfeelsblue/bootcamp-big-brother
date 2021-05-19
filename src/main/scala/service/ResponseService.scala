@@ -1,10 +1,10 @@
 package service
 
-import cats.effect.{ Resource, Sync }
+import cats.effect.{Resource, Sync}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import domain.response.Response
-import repository.response.ResponseQueries
+import repository.ResponseQueries
 import skunk.Session
 
 trait ResponseService[F[_]] {
