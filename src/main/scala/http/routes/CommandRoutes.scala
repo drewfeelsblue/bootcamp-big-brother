@@ -22,14 +22,16 @@ final case class CommandRoutes[F[_]: Sync](taskService: TaskService[F], slackApi
 
   val routes = CommandMiddleware {
     case Init(topic, title, channel, creator, responseUrl) =>
-      slackApiClient.events.reply(
-        response_url = responseUrl,
-        SlackApiEventMessageReply(
-          text = "",
-          blocks = InitTaskMessage.success(topic, title, creator),
-          response_type = Some(SlackResponseTypes.InChannel)
+      (taskService.save(Task(topic, title, channel, creator)) >>= { taskId =>
+        slackApiClient.events.reply(
+          response_url = responseUrl,
+          SlackApiEventMessageReply(
+            text = "",
+            blocks = InitTaskMessage.success(topic, title, creator, taskId),
+            response_type = Some(SlackResponseTypes.InChannel)
+          )
         )
-      ) *> taskService.save(Task(topic, title, channel, creator)) *> Ok()
+      }) *> Ok()
     case SyntaxError => Ok(InitTaskMessage.fail)
   }
 }

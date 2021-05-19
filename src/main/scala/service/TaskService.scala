@@ -1,28 +1,28 @@
 package service
 
 import cats.effect.{ Resource, Sync }
-import cats.syntax.functor._
 import cats.syntax.flatMap._
-import domain.task.Task
+import domain.task.{ Task, TaskId }
 import repository.task.TaskQueries
 import skunk.Session
+import skunk.implicits.toIdOps
 
 trait TaskService[F[_]] {
-  def save(task: Task): F[Unit]
+  def save(task: Task): F[TaskId]
 }
 
 object TaskService {
   def make[F[_]: Sync](sessionPool: Resource[F, Session[F]]): TaskService[F] = new TaskService[F] {
-    override def save(task: Task): F[Unit] =
+    override def save(task: Task): F[TaskId] =
       (for {
         session <- sessionPool
-        findPreparedQuery <- session.prepare(TaskQueries.findByTopicAndTitle)
+        findPreparedQuery <- session.prepare(TaskQueries.findByTopicAndTitleAndChannel)
         savePreparedQuery <- session.prepare(TaskQueries.save)
       } yield (findPreparedQuery, savePreparedQuery)).use {
         case (findPreparedQuery, savePreparedQuery) =>
-          findPreparedQuery.option(task.topic, task.title) >>= {
-              case Some(_) => Sync[F].pure(())
-              case _       => savePreparedQuery.execute(task).void
+          findPreparedQuery.option(task.topic ~ task.title ~ task.channelId) >>= {
+              case Some((id, _)) => Sync[F].pure(id)
+              case _             => savePreparedQuery.unique(task)
             }
       }
   }

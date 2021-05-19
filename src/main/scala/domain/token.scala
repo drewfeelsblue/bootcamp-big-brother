@@ -13,7 +13,7 @@ object token {
       teamId: SlackTeamId,
       `type`: SlackApiTokenType,
       value: SlackAccessTokenValue,
-      user_id: SlackUserId,
+      userId: SlackUserId,
       scope: SlackApiTokenScope
   )
 }

@@ -1,23 +1,25 @@
 package repository.task
 
-import domain.task.{ Task, Title, Topic }
-import repository.task.TaskCodecs.{ taskCodec, titleCodec, topicCodec }
-import skunk.{ ~, Command, Query }
+import domain.task.{ Task, TaskId, Title, Topic }
+import org.latestbit.slack.morphism.common.SlackChannelId
+import repository.task.TaskCodecs.{ channelCodec, taskCodec, taskIdCodec, titleCodec, topicCodec }
+import skunk.{ ~, Query }
 import skunk.implicits.toStringOps
 
 object TaskQueries {
   private val tableName = "big_brother.t_tasks"
 
-  val save: Command[Task] =
+  val save: Query[Task, TaskId] =
     sql"""
          INSERT INTO #$tableName (topic, title, channel_id, creator_id)
          VALUES ${taskCodec.values}
-       """.command
+         RETURNING id
+       """.query(taskIdCodec)
 
-  val findByTopicAndTitle: Query[Topic ~ Title, Task] =
+  val findByTopicAndTitleAndChannel: Query[Topic ~ Title ~ SlackChannelId, TaskId ~ Task] =
     sql"""
-         SELECT topic, title, channel_id, creator_id
+         SELECT id, topic, title, channel_id, creator_id
          FROM #$tableName 
-         WHERE topic = $topicCodec AND title = $titleCodec
-       """.query(taskCodec)
+         WHERE topic = $topicCodec AND title = $titleCodec AND channel_id = $channelCodec
+       """.query(taskIdCodec ~ taskCodec)
 }

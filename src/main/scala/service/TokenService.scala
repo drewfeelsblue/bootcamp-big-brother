@@ -30,6 +30,6 @@ object TokenService {
       }
 
     override def findByTeamId(teamId: SlackTeamId): F[Option[Token]] =
-      sessionPool.flatMap(_.prepare(TokenQueries.findByTeamId)).use(_.stream(teamId, 64).compile.toList.map(_.lastOption))
+      sessionPool.flatMap(_.prepare(TokenQueries.findByTeamId)).use(_.option(teamId))
   }
 }

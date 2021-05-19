@@ -1,5 +1,6 @@
 package repository
 
+import scala.language.implicitConversions
 import io.estatico.newtype.Coercible
 import skunk.Codec
 
