@@ -4,7 +4,7 @@ import org.latestbit.slack.morphism.client.templating.SlackModalViewTemplate
 import org.latestbit.slack.morphism.common.{SlackActionId, SlackBlockId, SlackTriggerId}
 import org.latestbit.slack.morphism.messages.{SlackBlock, SlackBlockPlainInputElement, SlackBlockPlainText}
 
-class PostAnswerModalView(blockId: String) extends SlackModalViewTemplate {
+final class PostAnswerModalView(blockId: String) extends SlackModalViewTemplate {
   override def titleText(): SlackBlockPlainText          = pt"Title"
   override def submitText(): Option[SlackBlockPlainText] = Some(pt"Submit")
   override def closeText(): Option[SlackBlockPlainText]  = Some(pt"Close")
