@@ -3,9 +3,9 @@ package repository
 import domain.response.Response
 import domain.task.TaskId
 import org.latestbit.slack.morphism.common.SlackUserId
-import skunk.codec.all.{ int8, text }
+import skunk.codec.all.{int8, text}
 import skunk.implicits.toStringOps
-import skunk.{ ~, Codec, Command, Query }
+import skunk.{~, Codec, Command, Query}
 
 object ResponseQueries {
   import codecs._

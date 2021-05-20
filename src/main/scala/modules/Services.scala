@@ -1,13 +1,13 @@
 package modules
 
-import cats.effect.{ Resource, Sync }
-import service.{ ResponseService, TaskService, TokenService }
+import cats.effect.{Resource, Sync}
+import service.{ResponseService, TaskService, TokenService}
 import skunk.Session
 
 sealed abstract case class Services[F[_]] private (
-    tokens: TokenService[F],
-    tasks: TaskService[F],
-    responses: ResponseService[F]
+  tokens: TokenService[F],
+  tasks: TaskService[F],
+  responses: ResponseService[F]
 )
 
 object Services {

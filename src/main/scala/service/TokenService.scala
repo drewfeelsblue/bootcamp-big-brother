@@ -17,16 +17,15 @@ object TokenService {
   def make[F[_]: Sync](sessionPool: Resource[F, Session[F]]): TokenService[F] = new TokenService[F] {
     override def save(token: Token): F[Unit] =
       (for {
-        session <- sessionPool
+        session           <- sessionPool
         findPreparedQuery <- session.prepare(TokenQueries.findByTeamId)
         savePreparedQuery <- session.prepare(TokenQueries.save)
 
-      } yield (findPreparedQuery, savePreparedQuery)).use {
-        case (findPreparedQuery, savePreparedQuery) =>
-          findPreparedQuery.option(token.teamId) >>= {
-              case Some(_) => Sync[F].pure(())
-              case _       => savePreparedQuery.execute(token).void
-            }
+      } yield (findPreparedQuery, savePreparedQuery)).use { case (findPreparedQuery, savePreparedQuery) =>
+        findPreparedQuery.option(token.teamId) >>= {
+          case Some(_) => Sync[F].pure(())
+          case _       => savePreparedQuery.execute(token).void
+        }
       }
 
     override def findByTeamId(teamId: SlackTeamId): F[Option[Token]] =

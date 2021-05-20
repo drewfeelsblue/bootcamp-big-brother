@@ -3,7 +3,7 @@ package http.routes
 import cats.effect.Sync
 import cats.implicits._
 import domain.task.Task
-import http.middlewares.{ CommandMiddleware, CommandOptions }
+import http.middlewares.{CommandMiddleware, CommandOptions}
 import http.templates.InitTaskMessage
 import org.http4s._
 import org.http4s.circe.jsonEncoderOf
@@ -13,12 +13,12 @@ import org.latestbit.slack.morphism.client.reqresp.events.SlackApiEventMessageRe
 import org.latestbit.slack.morphism.codecs.CirceCodecs
 import org.latestbit.slack.morphism.common.SlackResponseTypes
 import service.TaskService
+import org.http4s.circe.CirceEntityEncoder._
 
-final case class CommandRoutes[F[_]: Sync](taskService: TaskService[F], slackApiClient: SlackApiClientT[F])
+final class CommandRoutes[F[_]: Sync](taskService: TaskService[F], slackApiClient: SlackApiClientT[F])
     extends Http4sDsl[F]
     with CirceCodecs {
   import CommandOptions._
-  implicit val slackApiEventMessageReplyEncoder: EntityEncoder[F, SlackApiEventMessageReply] = jsonEncoderOf
 
   val routes = CommandMiddleware {
 

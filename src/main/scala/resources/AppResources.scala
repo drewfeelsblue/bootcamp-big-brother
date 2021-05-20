@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext
 case class AppResources[F[_]](psql: Resource[F, Session[F]], slackApiClient: SlackApiClientT[F])
 
 object AppResources {
-  def make[F[_]: Concurrent: ContextShift: ConcurrentEffect](dbConfig: DbConfig): Resource[F, AppResources[F]] = {
+  def make[F[_]: ContextShift: ConcurrentEffect](dbConfig: DbConfig): Resource[F, AppResources[F]] = {
     val DbConfig(host, port, user, password, databaseName, maxSessions) = dbConfig
     val sessionPool: SessionPool[F] = Session
       .pooled(

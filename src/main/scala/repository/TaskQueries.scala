@@ -1,10 +1,10 @@
 package repository
 
-import domain.task.{ Task, TaskId, Title, Topic }
-import org.latestbit.slack.morphism.common.{ SlackChannelId, SlackUserId }
-import skunk.codec.all.{ int8, text }
+import domain.task.{Task, TaskId, Title, Topic}
+import org.latestbit.slack.morphism.common.{SlackChannelId, SlackUserId}
+import skunk.codec.all.{int8, text}
 import skunk.implicits.toStringOps
-import skunk.{ ~, Codec, Query }
+import skunk.{~, Codec, Query}
 
 object TaskQueries {
   import codecs._

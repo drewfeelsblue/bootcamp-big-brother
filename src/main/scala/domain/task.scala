@@ -2,7 +2,7 @@ package domain
 
 import scala.language.implicitConversions
 import io.estatico.newtype.macros.newtype
-import org.latestbit.slack.morphism.common.{ SlackChannelId, SlackUserId }
+import org.latestbit.slack.morphism.common.{SlackChannelId, SlackUserId}
 
 object task {
 
@@ -11,9 +11,9 @@ object task {
   @newtype case class Title(value: String)
 
   final case class Task(
-      topic: Topic,
-      title: Title,
-      channelId: SlackChannelId,
-      creatorId: SlackUserId
+    topic: Topic,
+    title: Title,
+    channelId: SlackChannelId,
+    creatorId: SlackUserId
   )
 }

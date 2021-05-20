@@ -12,10 +12,10 @@ import org.http4s.implicits.http4sLiteralsSyntax
 import org.latestbit.slack.morphism.client.SlackApiClientT
 import service.TokenService
 
-final case class OAuthRoutes[F[_]: Sync](
-    slackApiClient: SlackApiClientT[F],
-    tokenService: TokenService[F],
-    slackAppConfig: SlackAppConfig
+final class OAuthRoutes[F[_]: Sync](
+  slackApiClient: SlackApiClientT[F],
+  tokenService: TokenService[F],
+  slackAppConfig: SlackAppConfig
 ) extends Http4sDsl[F] {
   object OAuthCodeOptParam extends OptionalQueryParamDecoderMatcher[String]("code")
   object ErrorCodeOptParam extends OptionalQueryParamDecoderMatcher[String]("error")
@@ -26,8 +26,8 @@ final case class OAuthRoutes[F[_]: Sync](
 
     case GET -> Root / "auth" / "install" =>
       val params = Map(
-        "client_id" -> slackAppConfig.clientId.value,
-        "scope" -> slackAppConfig.scope.value,
+        "client_id"   -> slackAppConfig.clientId.value,
+        "scope"       -> slackAppConfig.scope.value,
         "redirect_id" -> slackAppConfig.redirectUrl.value
       )
       TemporaryRedirect(Location(SlackAuthUrlV2.withQueryParams(params)))
@@ -43,12 +43,11 @@ final case class OAuthRoutes[F[_]: Sync](
               Some(slackAppConfig.redirectUrl.value)
             )
           ).semiflatTap { accessTokenResponse =>
-              import accessTokenResponse._
-              tokenService.save(Token(team.id, token_type, access_token, authed_user.id, scope))
-            }
-            .foldF(_ => InternalServerError(), _ => Ok("Application successfully installed"))
+            import accessTokenResponse._
+            tokenService.save(Token(team.id, token_type, access_token, authed_user.id, scope))
+          }.foldF(_ => InternalServerError("Error during installation"), _ => Ok("Application successfully installed"))
         case (_, Some(error)) => Ok(s"Install application error: $error")
-        case _                => InternalServerError()
+        case _                => InternalServerError("Error during installation")
       }
   }
 }

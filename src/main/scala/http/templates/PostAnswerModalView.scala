@@ -1,8 +1,8 @@
 package http.templates
 
 import org.latestbit.slack.morphism.client.templating.SlackModalViewTemplate
-import org.latestbit.slack.morphism.common.{ SlackActionId, SlackBlockId, SlackTriggerId }
-import org.latestbit.slack.morphism.messages.{ SlackBlock, SlackBlockPlainInputElement, SlackBlockPlainText }
+import org.latestbit.slack.morphism.common.{SlackActionId, SlackBlockId, SlackTriggerId}
+import org.latestbit.slack.morphism.messages.{SlackBlock, SlackBlockPlainInputElement, SlackBlockPlainText}
 
 class PostAnswerModalView(blockId: String) extends SlackModalViewTemplate {
   override def titleText(): SlackBlockPlainText          = pt"Title"

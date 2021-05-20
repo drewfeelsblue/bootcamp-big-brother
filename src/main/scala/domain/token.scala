@@ -10,10 +10,10 @@ import org.latestbit.slack.morphism.common.{
 
 object token {
   final case class Token(
-      teamId: SlackTeamId,
-      `type`: SlackApiTokenType,
-      value: SlackAccessTokenValue,
-      userId: SlackUserId,
-      scope: SlackApiTokenScope
+    teamId: SlackTeamId,
+    `type`: SlackApiTokenType,
+    value: SlackAccessTokenValue,
+    userId: SlackUserId,
+    scope: SlackApiTokenScope
   )
 }

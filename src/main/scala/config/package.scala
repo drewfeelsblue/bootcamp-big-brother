@@ -1,6 +1,6 @@
 import cats.implicits.toFunctorOps
 import eu.timepit.refined.api.Refined
-import eu.timepit.refined.numeric.{ Interval, Positive }
+import eu.timepit.refined.numeric.{Interval, Positive}
 import eu.timepit.refined.string.IPv4
 
 package object config {

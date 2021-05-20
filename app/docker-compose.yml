@@ -9,7 +9,7 @@ services:
     ports:
       - "5432:5432"
   app:
-    image: default/bootcamp-big-brother
+    image: bootcamp-big-brother
     depends_on:
       - db
     ports:

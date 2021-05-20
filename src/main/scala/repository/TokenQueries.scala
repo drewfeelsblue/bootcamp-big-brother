@@ -4,7 +4,7 @@ import domain.token.Token
 import org.latestbit.slack.morphism.common._
 import skunk.codec.all.text
 import skunk.implicits.toStringOps
-import skunk.{ Codec, Command, Query }
+import skunk.{Codec, Command, Query}
 
 object TokenQueries {
   import codecs._

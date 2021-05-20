@@ -4,7 +4,7 @@ import cats.effect.Sync
 import cats.syntax.flatMap._
 import com.typesafe.config.ConfigFactory
 import org.typelevel.log4cats.Logger
-import pureconfig.{ ConfigReader, ConfigSource }
+import pureconfig.{ConfigReader, ConfigSource}
 
 import scala.reflect.ClassTag
 
