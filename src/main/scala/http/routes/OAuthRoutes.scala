@@ -5,7 +5,6 @@ import cats.effect.Sync
 import config.SlackAppConfig
 import domain.token.Token
 import org.http4s.HttpRoutes
-import org.http4s._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.Location
 import org.http4s.implicits.http4sLiteralsSyntax

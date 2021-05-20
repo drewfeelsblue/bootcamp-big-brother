@@ -11,6 +11,6 @@ sealed abstract case class Services[F[_]] private (
 )
 
 object Services {
-  def make[F[_]: Sync](sessionPool: Resource[F, Session[F]]): Services[F] =
+  def apply[F[_]: Sync](sessionPool: Resource[F, Session[F]]): Services[F] =
     new Services[F](TokenService.make(sessionPool), TaskService.make(sessionPool), ResponseService.make(sessionPool)) {}
 }

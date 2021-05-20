@@ -1,22 +1,29 @@
 package http.routes
 
 import cats.Order
-import cats.data.{EitherT, NonEmptySet, OptionT}
-import cats.effect.{Concurrent, ConcurrentEffect}
+import cats.data.{NonEmptySet, OptionT}
+import cats.effect.Concurrent
 import cats.implicits._
-import cats.effect.implicits._
+import cats.effect.syntax.concurrent._
 import domain.response.Response
 import domain.task.TaskId
 import domain.token.Token
 import http.middlewares.InteractionMiddleware
 import http.templates.PostAnswerModalView
-import io.circe.{Decoder, Json}
+import io.circe.Json
 import org.http4s.dsl.Http4sDsl
 import org.latestbit.slack.morphism.client.reqresp.files.{SlackApiFilesUploadRequest, SlackApiFilesUploadResponse}
 import org.latestbit.slack.morphism.client.reqresp.users.{SlackApiUsersInfoRequest, SlackApiUsersInfoResponse}
 import org.latestbit.slack.morphism.client.{SlackApiClientT, SlackApiToken}
-import org.latestbit.slack.morphism.client.reqresp.views.SlackApiViewsOpenRequest
-import org.latestbit.slack.morphism.common.{SlackChannelId, SlackFileType, SlackUserId, SlackUserInfo}
+import org.latestbit.slack.morphism.client.reqresp.views.{SlackApiViewsOpenRequest, SlackApiViewsOpenResponse}
+import org.latestbit.slack.morphism.common.{
+  SlackActionId,
+  SlackChannelId,
+  SlackFileType,
+  SlackTriggerId,
+  SlackUserId,
+  SlackUserInfo
+}
 import org.latestbit.slack.morphism.events.{SlackInteractionBlockActionEvent, SlackInteractionViewSubmissionEvent}
 import org.typelevel.log4cats.Logger
 import service.{ResponseService, TaskService, TokenService}
@@ -35,42 +42,42 @@ final class InteractionRoutes[F[_]: Concurrent: Logger](
   val routes = InteractionMiddleware {
 
     case blockActionEvent: SlackInteractionBlockActionEvent =>
-      tokenService.findByTeamId(blockActionEvent.team.id) >>= {
-        case Some(token) =>
-          val maybeActionId = blockActionEvent.actions.flatMap(_.headOption).map(_.action_id)
-          implicit val evidence =
-            SlackApiToken.createFrom(token.`type`, token.value, Some(token.scope), Some(token.teamId))
-          slackApiClient.views
-            .open(
-              SlackApiViewsOpenRequest(
-                trigger_id = blockActionEvent.trigger_id,
-                view = new PostAnswerModalView(maybeActionId.fold("-1")(_.value)).toModalView()
-              )
-            )
-            .start *> Ok()
-        case _ => InternalServerError()
-      }
+      (for {
+        token                                  <- OptionT(tokenService.findByTeamId(blockActionEvent.team.id))
+        actionId                               <- OptionT.fromOption[F](blockActionEvent.actions.flatMap(_.headOption).map(_.action_id))
+        implicit0(slackApiToken: SlackApiToken) = createSlackApiToken(token)
+        _                                      <- openCodeSubmissionView(blockActionEvent.trigger_id, actionId)
+      } yield ()).value.start *> Ok()
 
     case actionSubmissionEvent: SlackInteractionViewSubmissionEvent =>
       val senderId = actionSubmissionEvent.user.id
       (for {
         token                                  <- OptionT(tokenService.findByTeamId(actionSubmissionEvent.team.id))
         implicit0(slackApiToken: SlackApiToken) = createSlackApiToken(token)
-
-        (taskId, codeValue) <- OptionT.fromOption[F](
-          actionSubmissionEvent.view.stateParams.state
-            .flatMap(_.values.lastOption)
-            .flatMap { case (taskId, codeValue) => taskId.toLongOption.map((_, codeValue)) }
-        )
-        task            <- OptionT(taskService.findById(TaskId(taskId)))
-        _               <- OptionT.liftF(responseService.save(Response(TaskId(taskId), senderId)))
-        senderInfo      <- getSenderInfo(senderId)
-        codeInputStream <- decodeSubmittedCode(codeValue)
-        _               <- sendCode(task.creatorId, senderInfo.user, codeInputStream)
+        (taskId, codeInputStream)              <- fetchFromEvent(actionSubmissionEvent)
+        task                                   <- OptionT(taskService.findById(taskId))
+        _                                      <- OptionT.liftF(responseService.save(Response(taskId, senderId)))
+        senderInfo                             <- getSenderInfo(senderId)
+        _                                      <- sendCode(task.creatorId, senderInfo.user, codeInputStream)
       } yield ()).value.start *> Ok()
 
     case _ => InternalServerError()
   }
+
+  private def openCodeSubmissionView(eventTriggerId: SlackTriggerId, taskId: SlackActionId)(implicit
+    token: SlackApiToken
+  ): OptionT[F, SlackApiViewsOpenResponse] = OptionT(
+    slackApiClient.views
+      .open(SlackApiViewsOpenRequest(eventTriggerId, new PostAnswerModalView(taskId.value).toModalView()))
+      .map(_.toOption)
+  )
+
+  private def fetchFromEvent(event: SlackInteractionViewSubmissionEvent): OptionT[F, (TaskId, InputStream)] =
+    OptionT.fromOption[F] {
+      event.view.stateParams.state
+        .flatMap(_.values.lastOption)
+        .flatMap { case (taskId, codeValue) => taskId.toLongOption.map(id => (TaskId(id), codeValue)) }
+    } >>= { case (taskId, codeValue) => decodeSubmittedCode(codeValue).map((taskId, _)) }
 
   private def decodeSubmittedCode(code: Json): OptionT[F, InputStream] = OptionT.fromOption[F](
     code.hcursor
@@ -81,6 +88,16 @@ final class InteractionRoutes[F[_]: Concurrent: Logger](
       .map(new ByteArrayInputStream(_))
       .toOption
   )
+
+  private def createSlackApiToken(token: Token): SlackApiToken = {
+    import token._
+    SlackApiToken.createFrom(`type`, value, Some(scope), Some(teamId))
+  }
+
+  private def getSenderInfo(id: SlackUserId)(implicit token: SlackApiToken): OptionT[F, SlackApiUsersInfoResponse] =
+    OptionT {
+      slackApiClient.users.info(SlackApiUsersInfoRequest(id)).map(_.toOption)
+    }
 
   private def sendCode(creatorId: SlackUserId, senderInfo: SlackUserInfo, codeInputStream: InputStream)(implicit
     token: SlackApiToken
@@ -95,15 +112,5 @@ final class InteractionRoutes[F[_]: Concurrent: Logger](
         codeInputStream
       )
       .map(_.toOption)
-  }
-
-  private def getSenderInfo(id: SlackUserId)(implicit token: SlackApiToken): OptionT[F, SlackApiUsersInfoResponse] =
-    OptionT {
-      slackApiClient.users.info(SlackApiUsersInfoRequest(id)).map(_.toOption)
-    }
-
-  private def createSlackApiToken(token: Token): SlackApiToken = {
-    import token._
-    SlackApiToken.createFrom(`type`, value, Some(scope), Some(teamId))
   }
 }

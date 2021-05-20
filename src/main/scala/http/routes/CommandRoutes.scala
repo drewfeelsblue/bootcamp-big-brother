@@ -5,8 +5,6 @@ import cats.implicits._
 import domain.task.Task
 import http.middlewares.{CommandMiddleware, CommandOptions}
 import http.templates.InitTaskMessage
-import org.http4s._
-import org.http4s.circe.jsonEncoderOf
 import org.http4s.dsl.Http4sDsl
 import org.latestbit.slack.morphism.client.SlackApiClientT
 import org.latestbit.slack.morphism.client.reqresp.events.SlackApiEventMessageReply
