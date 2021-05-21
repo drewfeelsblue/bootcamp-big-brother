@@ -1,4 +1,4 @@
-package repository
+package service.queries
 
 import domain.task.{Task, TaskId, Title, Topic}
 import org.latestbit.slack.morphism.common.{SlackChannelId, SlackUserId}

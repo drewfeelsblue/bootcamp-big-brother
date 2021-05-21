@@ -1,4 +1,4 @@
-package repository
+package service.queries
 
 import domain.response.Response
 import domain.task.TaskId

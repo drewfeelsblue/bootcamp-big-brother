@@ -1,4 +1,4 @@
-package repository
+package service.queries
 
 import domain.token.Token
 import org.latestbit.slack.morphism.common._

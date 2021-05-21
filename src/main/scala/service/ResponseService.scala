@@ -4,7 +4,7 @@ import cats.effect.{Resource, Sync}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import domain.response.Response
-import repository.ResponseQueries
+import service.queries.ResponseQueries
 import skunk.Session
 
 trait ResponseService[F[_]] {

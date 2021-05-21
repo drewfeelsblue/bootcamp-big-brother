@@ -5,7 +5,7 @@ import cats.syntax.functor._
 import cats.syntax.flatMap._
 import domain.token.Token
 import org.latestbit.slack.morphism.common.SlackTeamId
-import repository.TokenQueries
+import service.queries.TokenQueries
 import skunk.Session
 
 trait TokenService[F[_]] {
