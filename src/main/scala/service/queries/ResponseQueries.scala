@@ -26,7 +26,7 @@ object ResponseQueries {
 
   object codecs {
     val taskIdCodec: Codec[TaskId]      = int8
-    val userIdCodec: Codec[SlackUserId] = text.imap(SlackUserId.apply)(_.value)
+    val userIdCodec: Codec[SlackUserId] = text
     val responseCodec: Codec[Response]  = (taskIdCodec ~ userIdCodec).gimap[Response]
   }
 }

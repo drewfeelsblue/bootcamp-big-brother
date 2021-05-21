@@ -35,8 +35,8 @@ object TaskQueries {
     val taskIdCodec: Codec[TaskId]          = int8
     val topicCodec: Codec[Topic]            = text
     val titleCodec: Codec[Title]            = text
-    val channelCodec: Codec[SlackChannelId] = text.imap(SlackChannelId.apply)(_.value)
-    val creatorCodec: Codec[SlackUserId]    = text.imap(SlackUserId.apply)(_.value)
+    val channelCodec: Codec[SlackChannelId] = text
+    val creatorCodec: Codec[SlackUserId]    = text
 
     val taskCodec: Codec[Task] = (topicCodec ~ titleCodec ~ channelCodec ~ creatorCodec).gimap[Task]
   }
