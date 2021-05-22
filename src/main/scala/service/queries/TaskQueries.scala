@@ -31,6 +31,13 @@ object TaskQueries {
          WHERE id = $taskIdCodec
        """.query(taskCodec)
 
+  val countByChannel: Query[SlackChannelId, Long] =
+    sql"""
+         SELECT COUNT(*)
+         FROM #$tableName
+         WHERE channel_id = $channelCodec
+       """.query(int8)
+
   object codecs {
     val taskIdCodec: Codec[TaskId]          = int8
     val topicCodec: Codec[Topic]            = text

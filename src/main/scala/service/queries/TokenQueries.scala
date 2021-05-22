@@ -36,5 +36,4 @@ object TokenQueries {
 
     val tokenCodec: Codec[Token] = (teamIdCodec ~ typeCodec ~ valueCodec ~ userIdCodec ~ scopeCodec).gimap[Token]
   }
-
 }

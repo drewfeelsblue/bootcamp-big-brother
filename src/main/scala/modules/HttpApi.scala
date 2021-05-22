@@ -16,7 +16,7 @@ sealed abstract case class HttpApi[F[_]: Concurrent: org.typelevel.log4cats.Logg
   import services._
 
   private val oauthRoutes       = new OAuthRoutes(slackApiClient, tokens, slackAppConfig)
-  private val commandRoutes     = new CommandRoutes(tasks, slackApiClient)
+  private val commandRoutes     = new CommandRoutes(tasks, responses, slackApiClient)
   private val interactionRoutes = new InteractionRoutes(tokens, tasks, responses, slackApiClient)
 
   val routes =

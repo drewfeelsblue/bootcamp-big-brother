@@ -3,12 +3,13 @@ package service
 import cats.effect.{Resource, Sync}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import domain.response.Response
+import domain.response.{Response, UserWithReplyCount}
 import service.queries.ResponseQueries
 import skunk.Session
 
 trait ResponseService[F[_]] {
   def save(response: Response): F[Unit]
+  def getAllUsersWithReplyCount: F[List[UserWithReplyCount]]
 }
 
 object ResponseService {
@@ -24,5 +25,8 @@ object ResponseService {
           case _       => savePreparedQuery.execute(response).void
         }
       }
+
+    override def getAllUsersWithReplyCount: F[List[UserWithReplyCount]] =
+      sessionPool.use(_.execute(ResponseQueries.getUsersWithReplyCount))
   }
 }

@@ -1,7 +1,8 @@
 package http.routes
 
-import cats.effect.Sync
+import cats.effect.{Concurrent, Sync}
 import cats.implicits._
+import cats.effect.syntax.concurrent._
 import domain.task.Task
 import http.middlewares.{CommandMiddleware, CommandOptions}
 import http.templates.InitTaskMessage
@@ -10,11 +11,14 @@ import org.latestbit.slack.morphism.client.SlackApiClientT
 import org.latestbit.slack.morphism.client.reqresp.events.SlackApiEventMessageReply
 import org.latestbit.slack.morphism.codecs.CirceCodecs
 import org.latestbit.slack.morphism.common.SlackResponseTypes
-import service.TaskService
+import service.{ResponseService, TaskService}
 import org.http4s.circe.CirceEntityEncoder._
 
-final class CommandRoutes[F[_]: Sync](taskService: TaskService[F], slackApiClient: SlackApiClientT[F])
-    extends Http4sDsl[F]
+final class CommandRoutes[F[_]: Concurrent](
+  taskService: TaskService[F],
+  responses: ResponseService[F],
+  slackApiClient: SlackApiClientT[F]
+) extends Http4sDsl[F]
     with CirceCodecs {
   import CommandOptions._
 
@@ -30,7 +34,12 @@ final class CommandRoutes[F[_]: Sync](taskService: TaskService[F], slackApiClien
             response_type = Some(SlackResponseTypes.InChannel)
           )
         )
-      }) *> Ok()
+      }).start *> Ok()
+
+    case Report(channel) =>
+      taskService.countByChannel(channel) >>= { repliesCount =>
+        responses.getAllUsersWithReplyCount.map(_.map((_, repliesCount)))
+      } >>= { response => Ok(s"$response") }
 
     case SyntaxError => Ok(InitTaskMessage.fail)
   }
