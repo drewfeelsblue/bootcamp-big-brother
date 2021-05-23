@@ -1,13 +1,15 @@
 package http.middlewares
 
+import cats.data.{Kleisli, OptionT}
 import cats.effect.Sync
 import cats.implicits.catsSyntaxTuple4Semigroupal
-import cats.syntax.flatMap._
+import cats.syntax.functor._
 import domain.task.{Title, Topic}
 import http.middlewares.CommandOptions.ReportType
-import org.http4s.{HttpRoutes, Response, UrlForm}
+import org.http4s.{Request, UrlForm}
 import org.http4s.dsl.Http4sDsl
 import org.latestbit.slack.morphism.common.{SlackChannelId, SlackUserId}
+import org.http4s.server.ContextMiddleware
 
 sealed trait CommandOptions
 object CommandOptions {
@@ -33,29 +35,31 @@ object CommandReportSyntax {
   }
 }
 
-object CommandMiddleware {
+trait CommandMiddleware[F[_]] extends Http4sDsl[F] {
   import CommandOptions._
+  private def fetchCommand(implicit S: Sync[F]): Kleisli[OptionT[F, *], Request[F], CommandOptions] = {
 
-  def apply[F[_]: Sync](resp: CommandOptions => F[Response[F]]): HttpRoutes[F] = {
-    val dsl = Http4sDsl[F]
-    import dsl._
-    HttpRoutes.of[F] { case req @ POST -> Root / "command" =>
-      req
-        .as[UrlForm]
-        .flatMap { form =>
-          (
-            form.getFirst("text"),
-            form.getFirst("channel_id"),
-            form.getFirst("user_id"),
-            form.getFirst("response_url")
-          ).tupled match {
-            case Some((CommandInitTaskSyntax(topic, title), channelId, userId, responseUrl)) =>
-              resp(Init(topic, title, SlackChannelId(channelId), SlackUserId(userId), responseUrl))
-            case Some((CommandReportSyntax(_), channelId, _, _)) =>
-              resp(Report(SlackChannelId(channelId)))
-            case _ => resp(SyntaxError)
+    Kleisli { case req @ POST -> Root / "command" =>
+      OptionT.liftF(
+        req
+          .as[UrlForm]
+          .map { form =>
+            (
+              form.getFirst("text"),
+              form.getFirst("channel_id"),
+              form.getFirst("user_id"),
+              form.getFirst("response_url")
+            ).tupled match {
+              case Some((CommandInitTaskSyntax(topic, title), channelId, userId, responseUrl)) =>
+                Init(topic, title, SlackChannelId(channelId), SlackUserId(userId), responseUrl)
+              case Some((CommandReportSyntax(_), channelId, _, _)) =>
+                Report(SlackChannelId(channelId))
+              case _ => SyntaxError
+            }
           }
-        }
+      )
     }
   }
+
+  def commandMiddleware(implicit S: Sync[F]) = ContextMiddleware(fetchCommand)
 }
