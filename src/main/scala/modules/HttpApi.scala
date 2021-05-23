@@ -1,9 +1,9 @@
 package modules
 
-import cats.effect.{Concurrent, Sync}
+import cats.effect.Concurrent
 import cats.implicits.toSemigroupKOps
 import config.SlackAppConfig
-import http.middlewares.CommandMiddleware
+import http.middlewares.{CommandMiddleware, InteractionMiddleware}
 import http.routes.{CommandRoutes, InteractionRoutes, OAuthRoutes}
 import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
 import org.http4s.server.middleware.Logger
@@ -13,9 +13,10 @@ sealed abstract case class HttpApi[F[_]: org.typelevel.log4cats.Logger] private 
   services: Services[F],
   slackApiClient: SlackApiClientT[F],
   slackAppConfig: SlackAppConfig
-)(implicit c: Concurrent[F]) extends CommandMiddleware[F] {
+)(implicit c: Concurrent[F])
+    extends CommandMiddleware[F]
+    with InteractionMiddleware[F] {
   import services._
-
 
   private val oauthRoutes       = new OAuthRoutes(slackApiClient, tokens, slackAppConfig)
   private val commandRoutes     = new CommandRoutes(tasks, responses, slackApiClient)
@@ -23,12 +24,14 @@ sealed abstract case class HttpApi[F[_]: org.typelevel.log4cats.Logger] private 
 
   val routes =
     Logger.httpApp(true, true)(
-      (oauthRoutes.routes <+> commandMiddleware(c)(commandRoutes.routes) <+> interactionRoutes.routes).orNotFound
+      (oauthRoutes.routes <+>
+        commandMiddleware(c)(commandRoutes.routes) <+>
+        interactionMiddleware(c)(interactionRoutes.routes)).orNotFound
     )
 }
 
 object HttpApi {
-  def apply[F[_]: Concurrent: org.typelevel.log4cats.Logger](
+  def routes[F[_]: Concurrent: org.typelevel.log4cats.Logger](
     services: Services[F],
     slackApiClientT: SlackApiClientT[F],
     slackAppConfig: SlackAppConfig
