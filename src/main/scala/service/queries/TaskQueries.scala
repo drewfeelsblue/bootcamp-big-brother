@@ -1,10 +1,10 @@
 package service.queries
 
-import domain.task.{Task, TaskId, Title, Topic}
+import domain.task.{Task, TaskCount, TaskId, Title, Topic}
 import org.latestbit.slack.morphism.common.{SlackChannelId, SlackUserId}
 import skunk.codec.all.{int8, text}
 import skunk.implicits.toStringOps
-import skunk.{~, Codec, Query}
+import skunk.{Codec, Query, ~}
 
 object TaskQueries {
   import codecs._
@@ -31,12 +31,12 @@ object TaskQueries {
          WHERE id = $taskIdCodec
        """.query(taskCodec)
 
-  val countByChannel: Query[SlackChannelId, Long] =
+  val countByChannel: Query[SlackChannelId, TaskCount] =
     sql"""
          SELECT COUNT(*)
          FROM #$tableName
          WHERE channel_id = $channelCodec
-       """.query(int8)
+       """.query(taskCountCodec)
 
   object codecs {
     val taskIdCodec: Codec[TaskId]          = int8
@@ -44,6 +44,7 @@ object TaskQueries {
     val titleCodec: Codec[Title]            = text
     val channelCodec: Codec[SlackChannelId] = text
     val creatorCodec: Codec[SlackUserId]    = text
+    val taskCountCodec: Codec[TaskCount]    = int8
 
     val taskCodec: Codec[Task] = (topicCodec ~ titleCodec ~ channelCodec ~ creatorCodec).gimap[Task]
   }

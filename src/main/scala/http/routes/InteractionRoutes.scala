@@ -45,32 +45,30 @@ final class InteractionRoutes[F[_]: Concurrent: Logger](
     with InteractionMiddleware[F] {
   implicit val slackChannelIdOrder: Order[SlackChannelId] = Order.by[SlackChannelId, String](_.value)
 
-  val routes: ContextRoutes[SlackInteractionEvent, F] = ContextRoutes.of[SlackInteractionEvent, F] {
-    case POST -> Root / "interaction" as event =>
-      event match {
+  val routes = ContextRoutes.of[SlackInteractionEvent, F] { case POST -> Root as event =>
+    event match {
+      case blockActionEvent: SlackInteractionBlockActionEvent =>
+        (for {
+          token                                  <- OptionT(tokenService.findByTeamId(blockActionEvent.team.id))
+          actionId                               <- OptionT.fromOption[F](blockActionEvent.actions.flatMap(_.headOption).map(_.action_id))
+          implicit0(slackApiToken: SlackApiToken) = createSlackApiToken(token)
+          _                                      <- openCodeSubmissionView(blockActionEvent.trigger_id, actionId)
+        } yield ()).value.start *> Ok()
 
-        case blockActionEvent: SlackInteractionBlockActionEvent =>
-          (for {
-            token                                  <- OptionT(tokenService.findByTeamId(blockActionEvent.team.id))
-            actionId                               <- OptionT.fromOption[F](blockActionEvent.actions.flatMap(_.headOption).map(_.action_id))
-            implicit0(slackApiToken: SlackApiToken) = createSlackApiToken(token)
-            _                                      <- openCodeSubmissionView(blockActionEvent.trigger_id, actionId)
-          } yield ()).value.start *> Ok()
+      case actionSubmissionEvent: SlackInteractionViewSubmissionEvent =>
+        val senderId = actionSubmissionEvent.user.id
+        (for {
+          token                                  <- OptionT(tokenService.findByTeamId(actionSubmissionEvent.team.id))
+          implicit0(slackApiToken: SlackApiToken) = createSlackApiToken(token)
+          (taskId, codeInputStream)              <- fetchFromEvent(actionSubmissionEvent)
+          task                                   <- OptionT(taskService.findById(taskId))
+          _                                      <- OptionT.liftF(responseService.save(Response(taskId, senderId)))
+          senderInfo                             <- getSenderInfo(senderId)
+          _                                      <- sendCode(task.creatorId, senderInfo.user, codeInputStream)
+        } yield ()).value.start *> Ok()
 
-        case actionSubmissionEvent: SlackInteractionViewSubmissionEvent =>
-          val senderId = actionSubmissionEvent.user.id
-          (for {
-            token                                  <- OptionT(tokenService.findByTeamId(actionSubmissionEvent.team.id))
-            implicit0(slackApiToken: SlackApiToken) = createSlackApiToken(token)
-            (taskId, codeInputStream)              <- fetchFromEvent(actionSubmissionEvent)
-            task                                   <- OptionT(taskService.findById(taskId))
-            _                                      <- OptionT.liftF(responseService.save(Response(taskId, senderId)))
-            senderInfo                             <- getSenderInfo(senderId)
-            _                                      <- sendCode(task.creatorId, senderInfo.user, codeInputStream)
-          } yield ()).value.start *> Ok()
-
-        case _ => InternalServerError()
-      }
+      case _ => InternalServerError()
+    }
   }
 
   private def openCodeSubmissionView(eventTriggerId: SlackTriggerId, taskId: SlackActionId)(implicit

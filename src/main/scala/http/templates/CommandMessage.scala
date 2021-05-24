@@ -5,8 +5,8 @@ import org.latestbit.slack.morphism.client.reqresp.events.SlackApiEventMessageRe
 import org.latestbit.slack.morphism.client.templating._
 import org.latestbit.slack.morphism.common.{SlackActionId, SlackResponseTypes, SlackUserId}
 import org.latestbit.slack.morphism.messages.SlackBlock
-object InitTaskMessage extends SlackBlocksTemplateDsl with SlackTextFormatters {
-  def success(topic: Topic, title: Title, creator: SlackUserId, taskId: TaskId): Option[List[SlackBlock]] =
+object CommandMessage extends SlackBlocksTemplateDsl with SlackTextFormatters {
+  def successInitTask(topic: Topic, title: Title, creator: SlackUserId, taskId: TaskId): Option[List[SlackBlock]] =
     blocks(
       sectionBlock(
         text = pt"${topic.value}: ${title.value} task is initiated"
@@ -24,8 +24,10 @@ object InitTaskMessage extends SlackBlocksTemplateDsl with SlackTextFormatters {
       )
     )
 
-  val fail: SlackApiEventMessageReply = SlackApiEventMessageReply(
-    text = "Invalid syntax",
-    response_type = Some(SlackResponseTypes.Ephemeral)
-  )
+  val failInitTask: Option[List[SlackBlock]] =
+    blocks(
+      sectionBlock(
+        text = pt"Invalid syntax"
+      )
+    )
 }

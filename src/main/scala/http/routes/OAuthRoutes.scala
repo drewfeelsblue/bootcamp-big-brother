@@ -23,7 +23,7 @@ final class OAuthRoutes[F[_]: Sync](
 
   val routes = HttpRoutes.of[F] {
 
-    case GET -> Root / "auth" / "install" =>
+    case GET -> Root / "install" =>
       val params = Map(
         "client_id"   -> slackAppConfig.clientId.value,
         "scope"       -> slackAppConfig.scope.value,
@@ -31,7 +31,7 @@ final class OAuthRoutes[F[_]: Sync](
       )
       TemporaryRedirect(Location(SlackAuthUrlV2.withQueryParams(params)))
 
-    case GET -> Root / "auth" / "callback" :? OAuthCodeOptParam(code) +& ErrorCodeOptParam(error) =>
+    case GET -> Root / "callback" :? OAuthCodeOptParam(code) +& ErrorCodeOptParam(error) =>
       (code, error) match {
         case (Some(oauthCode), _) =>
           EitherT(

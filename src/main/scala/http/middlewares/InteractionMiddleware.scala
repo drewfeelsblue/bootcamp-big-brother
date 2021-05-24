@@ -11,7 +11,7 @@ import org.latestbit.slack.morphism.events.SlackInteractionEvent
 
 trait InteractionMiddleware[F[_]] extends CirceCodecs with Http4sDsl[F] {
   private def fetchEvent(implicit S: Sync[F]): Kleisli[OptionT[F, *], Request[F], SlackInteractionEvent] = Kleisli {
-    case req @ POST -> Root / "interaction" =>
+    case req @ POST -> Root =>
       OptionT
         .liftF(req.as[UrlForm])
         .subflatMap(_.getFirst("payload"))

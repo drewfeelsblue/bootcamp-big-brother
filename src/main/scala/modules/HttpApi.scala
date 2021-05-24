@@ -6,6 +6,7 @@ import config.SlackAppConfig
 import http.middlewares.{CommandMiddleware, InteractionMiddleware}
 import http.routes.{CommandRoutes, InteractionRoutes, OAuthRoutes}
 import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
+import org.http4s.server.Router
 import org.http4s.server.middleware.Logger
 import org.latestbit.slack.morphism.client.SlackApiClientT
 
@@ -24,9 +25,11 @@ sealed abstract case class HttpApi[F[_]: org.typelevel.log4cats.Logger] private 
 
   val routes =
     Logger.httpApp(true, true)(
-      (oauthRoutes.routes <+>
-        commandMiddleware(c)(commandRoutes.routes) <+>
-        interactionMiddleware(c)(interactionRoutes.routes)).orNotFound
+      Router(
+        "/command"     -> commandMiddleware(c)(commandRoutes.routes),
+        "/interaction" -> interactionMiddleware(c)(interactionRoutes.routes),
+        "/auth"        -> oauthRoutes.routes
+      ).orNotFound
     )
 }
 

@@ -17,19 +17,19 @@ object CommandOptions {
 
   final case class Init(topic: Topic, title: Title, channel: SlackChannelId, creator: SlackUserId, responseUrl: String)
       extends CommandOptions
-  final case class Report(channel: SlackChannelId) extends CommandOptions
-  case object SyntaxError                          extends CommandOptions
+  final case class Report(channel: SlackChannelId)  extends CommandOptions
+  final case class SyntaxError(responseUrl: String) extends CommandOptions
 }
 
 object CommandInitTaskSyntax {
-  def unapply(text: String): Option[(Topic, Title)] = text.trim.split(" ").map(_.trim).toList match {
+  def unapply(text: String): Option[(Topic, Title)] = text.trim.split(" ").filterNot(_.isEmpty).toList match {
     case topic :: title :: Nil => Some(Topic(topic), Title(title))
     case _                     => None
   }
 }
 
 object CommandReportSyntax {
-  def unapply(text: String): Option[ReportType] = text.trim.split(" ").map(_.trim).toList match {
+  def unapply(text: String): Option[ReportType] = text.trim.split(" ").filterNot(_.isEmpty).toList match {
     case "report" :: Nil => Some("Report")
     case _               => None
   }
@@ -38,7 +38,7 @@ object CommandReportSyntax {
 trait CommandMiddleware[F[_]] extends Http4sDsl[F] {
   import CommandOptions._
   private def fetchCommand(implicit S: Sync[F]): Kleisli[OptionT[F, *], Request[F], CommandOptions] = Kleisli {
-    case req @ POST -> Root / "command" =>
+    case req @ POST -> Root =>
       OptionT.liftF(
         req
           .as[UrlForm]
@@ -53,7 +53,7 @@ trait CommandMiddleware[F[_]] extends Http4sDsl[F] {
                 Init(topic, title, SlackChannelId(channelId), SlackUserId(userId), responseUrl)
               case Some((CommandReportSyntax(_), channelId, _, _)) =>
                 Report(SlackChannelId(channelId))
-              case _ => SyntaxError
+              case Some((_, _, _, responseUrl)) => SyntaxError(responseUrl)
             }
           }
       )

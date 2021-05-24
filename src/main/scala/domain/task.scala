@@ -9,6 +9,7 @@ object task {
   @newtype case class TaskId(value: Long)
   @newtype case class Topic(value: String)
   @newtype case class Title(value: String)
+  @newtype case class TaskCount(value: Long)
 
   final case class Task(
     topic: Topic,

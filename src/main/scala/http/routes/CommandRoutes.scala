@@ -4,8 +4,8 @@ import cats.effect.Concurrent
 import cats.implicits._
 import cats.effect.syntax.concurrent._
 import domain.task.Task
-import http.middlewares.{CommandMiddleware, CommandOptions}
-import http.templates.InitTaskMessage
+import http.middlewares.CommandOptions
+import http.templates.CommandMessage
 import org.http4s.ContextRoutes
 import org.http4s.dsl.Http4sDsl
 import org.latestbit.slack.morphism.client.SlackApiClientT
@@ -23,7 +23,7 @@ final class CommandRoutes[F[_]: Concurrent](
     with CirceCodecs {
   import CommandOptions._
 
-  val routes: ContextRoutes[CommandOptions, F] = ContextRoutes.of[CommandOptions, F] { case req @ POST -> Root / "command" as command =>
+  val routes: ContextRoutes[CommandOptions, F] = ContextRoutes.of[CommandOptions, F] { case POST -> Root as command =>
     command match {
       case Init(topic, title, channel, creator, responseUrl) =>
         (taskService.save(Task(topic, title, channel, creator)) >>= { taskId =>
@@ -31,7 +31,7 @@ final class CommandRoutes[F[_]: Concurrent](
             response_url = responseUrl,
             SlackApiEventMessageReply(
               text = "",
-              blocks = InitTaskMessage.success(topic, title, creator, taskId),
+              blocks = CommandMessage.successInitTask(topic, title, creator, taskId),
               response_type = Some(SlackResponseTypes.InChannel)
             )
           )
@@ -42,7 +42,15 @@ final class CommandRoutes[F[_]: Concurrent](
           responses.getAllUsersWithReplyCount.map(_.map((_, repliesCount)))
         } >>= { response => Ok(s"$response") }
 
-      case SyntaxError => Ok(InitTaskMessage.fail)
+      case SyntaxError(responseUrl) =>
+        slackApiClient.events.reply(
+          response_url = responseUrl,
+          SlackApiEventMessageReply(
+            text = "",
+            blocks = CommandMessage.failInitTask,
+            response_type = Some(SlackResponseTypes.Ephemeral)
+          )
+        ) *> Ok()
     }
   }
 }
