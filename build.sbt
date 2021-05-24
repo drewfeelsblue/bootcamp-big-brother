@@ -15,6 +15,8 @@ scalacOptions ++= Seq(
 
 enablePlugins(DockerPlugin)
 
+resolvers += Resolver.bintrayRepo("evolutiongaming", "maven")
+
 lazy val slackScalaMorphismModels =
   ProjectRef(uri("git://github.com/drewfeelsblue/slack-morphism.git#master"), "slackMorphismModels")
 lazy val slackScalaMorphismClient =
@@ -56,7 +58,8 @@ lazy val root = project
       skunkCirce,
       newType,
       sttp,
-//          slackMorphismClient,
+//      scache,
+//      slackMorphismClient,
       log4cats,
       logback % Runtime
     )

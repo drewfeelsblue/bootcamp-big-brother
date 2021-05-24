@@ -37,9 +37,8 @@ object CommandReportSyntax {
 
 trait CommandMiddleware[F[_]] extends Http4sDsl[F] {
   import CommandOptions._
-  private def fetchCommand(implicit S: Sync[F]): Kleisli[OptionT[F, *], Request[F], CommandOptions] = {
-
-    Kleisli { case req @ POST -> Root / "command" =>
+  private def fetchCommand(implicit S: Sync[F]): Kleisli[OptionT[F, *], Request[F], CommandOptions] = Kleisli {
+    case req @ POST -> Root / "command" =>
       OptionT.liftF(
         req
           .as[UrlForm]
@@ -58,7 +57,6 @@ trait CommandMiddleware[F[_]] extends Http4sDsl[F] {
             }
           }
       )
-    }
   }
 
   def commandMiddleware(implicit S: Sync[F]) = ContextMiddleware(fetchCommand)

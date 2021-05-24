@@ -10,6 +10,7 @@ object Dependencies {
     val slackMorphismClient = "3.1.0"
     val newType             = "0.4.4"
     val sttp                = "2.0.6"
+    val scache              = "2.2.1"
 
     val postgresJdbc = "42.2.20"
     val flyway       = "7.8.2"
@@ -30,11 +31,12 @@ object Dependencies {
     val skunkCirce = "org.tpolecat"                 %% "skunk-circe"    % Versions.skunk
     val newType    = "io.estatico"                  %% "newtype"        % Versions.newType
     val sttp       = "com.softwaremill.sttp.client" %% "http4s-backend" % Versions.sttp
+    val scache     = "com.evolutiongaming"          %% "scache"         % Versions.scache
 
     val postgresJdbc = "org.postgresql" % "postgresql"  % Versions.postgresJdbc
     val flyway       = "org.flywaydb"   % "flyway-core" % Versions.flyway
 
-    val log4cats = "org.typelevel"  %% "log4cats-slf4j" % Versions.log4cats
+    val log4cats = "org.typelevel" %% "log4cats-slf4j"  % Versions.log4cats
     val logback  = "ch.qos.logback" % "logback-classic" % Versions.logback
 
     val slackMorphismClient = "org.latestbit" %% "slack-morphism-client" % Versions.slackMorphismClient
