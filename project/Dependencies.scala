@@ -10,7 +10,7 @@ object Dependencies {
     val slackMorphismClient = "3.1.0"
     val newType             = "0.4.4"
     val sttp                = "2.0.6"
-    val scache              = "2.2.1"
+    val scache              = "3.2.0"
 
     val postgresJdbc = "42.2.20"
     val flyway       = "7.8.2"

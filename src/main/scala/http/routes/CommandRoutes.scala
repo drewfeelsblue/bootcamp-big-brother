@@ -3,8 +3,9 @@ package http.routes
 import cats.effect.Concurrent
 import cats.implicits._
 import cats.effect.syntax.concurrent._
+import domain.command.CommandOptions
+import domain.command.CommandOptions._
 import domain.task.Task
-import http.middlewares.CommandOptions
 import http.templates.CommandMessage
 import org.http4s.ContextRoutes
 import org.http4s.dsl.Http4sDsl
@@ -21,14 +22,13 @@ final class CommandRoutes[F[_]: Concurrent](
   slackApiClient: SlackApiClientT[F]
 ) extends Http4sDsl[F]
     with CirceCodecs {
-  import CommandOptions._
 
   val routes: ContextRoutes[CommandOptions, F] = ContextRoutes.of[CommandOptions, F] { case POST -> Root as command =>
     command match {
       case Init(topic, title, channel, creator, responseUrl) =>
         (taskService.save(Task(topic, title, channel, creator)) >>= { taskId =>
           slackApiClient.events.reply(
-            response_url = responseUrl,
+            response_url = responseUrl.value,
             SlackApiEventMessageReply(
               text = "",
               blocks = CommandMessage.successInitTask(topic, title, creator, taskId),
@@ -37,14 +37,23 @@ final class CommandRoutes[F[_]: Concurrent](
           )
         }).start *> Ok()
 
-      case Report(channel) =>
-        taskService.countByChannel(channel) >>= { repliesCount =>
-          responses.getAllUsersWithReplyCount.map(_.map((_, repliesCount)))
-        } >>= { response => Ok(s"$response") }
+      case Report(channel, responseUrl) =>
+        ((taskService.countByChannel(channel), responses.getAllUsersWithReplyCount).tupled >>= {
+          case (totalTaskCount, usersWithReplyCount) =>
+            slackApiClient.events
+              .reply(
+                response_url = responseUrl.value,
+                SlackApiEventMessageReply(
+                  text = "",
+                  blocks = CommandMessage.report(totalTaskCount, usersWithReplyCount),
+                  response_type = Some(SlackResponseTypes.Ephemeral)
+                )
+              )
+        }) *> Ok()
 
       case SyntaxError(responseUrl) =>
         slackApiClient.events.reply(
-          response_url = responseUrl,
+          response_url = responseUrl.value,
           SlackApiEventMessageReply(
             text = "",
             blocks = CommandMessage.failInitTask,

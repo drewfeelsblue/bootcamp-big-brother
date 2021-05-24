@@ -1,10 +1,12 @@
 package http.templates
 
-import domain.task.{TaskId, Title, Topic}
+import domain.response.UserWithReplyCount
+import domain.task.{TaskCount, TaskId, Title, Topic}
 import org.latestbit.slack.morphism.client.reqresp.events.SlackApiEventMessageReply
 import org.latestbit.slack.morphism.client.templating._
 import org.latestbit.slack.morphism.common.{SlackActionId, SlackResponseTypes, SlackUserId}
 import org.latestbit.slack.morphism.messages.SlackBlock
+
 object CommandMessage extends SlackBlocksTemplateDsl with SlackTextFormatters {
   def successInitTask(topic: Topic, title: Title, creator: SlackUserId, taskId: TaskId): Option[List[SlackBlock]] =
     blocks(
@@ -30,4 +32,6 @@ object CommandMessage extends SlackBlocksTemplateDsl with SlackTextFormatters {
         text = pt"Invalid syntax"
       )
     )
+
+  def report(totalTaskCount: TaskCount, usersWithReplyCount: List[UserWithReplyCount]): Option[List[SlackBlock]] = ???
 }
