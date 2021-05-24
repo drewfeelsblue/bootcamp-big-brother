@@ -33,5 +33,12 @@ object CommandMessage extends SlackBlocksTemplateDsl with SlackTextFormatters {
       )
     )
 
-  def report(totalTaskCount: TaskCount, usersWithReplyCount: List[UserWithReplyCount]): Option[List[SlackBlock]] = ???
+  def report(totalTaskCount: TaskCount, usersWithReplyCount: List[UserWithReplyCount]): Option[List[SlackBlock]] =
+    usersWithReplyCount
+      .map(_ -> totalTaskCount)
+      .map { case (UserWithReplyCount(userId, userReplyCount), totalTaskCount) =>
+        sectionBlock(
+          text = md"${formatSlackUserId(userId)} _$userReplyCount/${totalTaskCount}_"
+        )
+      }
 }

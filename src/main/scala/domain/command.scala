@@ -38,5 +38,4 @@ object command {
       case _               => None
     }
   }
-
 }
