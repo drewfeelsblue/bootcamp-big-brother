@@ -49,17 +49,19 @@ final class CommandRoutes[F[_]: Concurrent](
                   response_type = Some(SlackResponseTypes.Ephemeral)
                 )
               )
-        }) *> Ok()
+        }).start *> Ok()
 
       case SyntaxError(responseUrl) =>
-        slackApiClient.events.reply(
-          response_url = responseUrl.value,
-          SlackApiEventMessageReply(
-            text = "",
-            blocks = CommandMessage.failInitTask,
-            response_type = Some(SlackResponseTypes.Ephemeral)
+        slackApiClient.events
+          .reply(
+            response_url = responseUrl.value,
+            SlackApiEventMessageReply(
+              text = "",
+              blocks = CommandMessage.failInitTask,
+              response_type = Some(SlackResponseTypes.Ephemeral)
+            )
           )
-        ) *> Ok()
+          .start *> Ok()
     }
   }
 }
