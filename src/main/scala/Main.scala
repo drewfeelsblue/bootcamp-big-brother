@@ -21,9 +21,11 @@ object Main extends IOApp {
       ).tupled
       _ <- DbMigration.migrate[IO](dbMigrationConfig)
       _ <- AppResources.make[IO](dbConfig).use { case AppResources(psql, slackClient) =>
-        val services = Services[IO](psql)
-        val routes   = HttpApi.routes(services, slackClient, slackAppConfig)
-        HttpServer.resource(httpServerConfig, routes).use(_ => IO.never)
+        for {
+          services <- Services.make(psql)
+          routes   = HttpApi.routes(services, slackClient, slackAppConfig)
+          _ <- HttpServer.resource(httpServerConfig, routes).use(_ => IO.never)
+        } yield ()
       }
     } yield ExitCode.Success
 }
