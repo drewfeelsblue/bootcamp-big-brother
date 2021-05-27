@@ -24,6 +24,7 @@ object TokenService {
     sessionPool: Resource[F, Session[F]]
   ): Resource[F, TokenService[F]] = {
     val config: Config[F, SlackTeamId, Token] = ExpiringCache.Config(Duration(5, MINUTES))
+
     Cache.expiring[F, SlackTeamId, Token](config).map { cache =>
       new TokenService[F] {
         override def save(token: Token): F[Unit] =
@@ -39,12 +40,7 @@ object TokenService {
           }
 
         override def findByTeamId(teamId: SlackTeamId): F[Option[Token]] = {
-          Logger[F].info("Call method findByTeamId") *>
-            cache.getOrUpdateOpt(teamId)(
-              Logger[F].info("Retrieve token value from db") *> sessionPool
-                .flatMap(_.prepare(TokenQueries.findByTeamId))
-                .use(_.option(teamId))
-            )
+          cache.getOrUpdateOpt(teamId)(sessionPool.flatMap(_.prepare(TokenQueries.findByTeamId)).use(_.option(teamId)))
         }
       }
     }
