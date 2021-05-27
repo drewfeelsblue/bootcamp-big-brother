@@ -20,9 +20,9 @@ trait TokenService[F[_]] {
 }
 
 object TokenService {
-  def make[F[_]: Concurrent: Timer: Runtime: Parallel: Logger](
+  def resource[F[_]: Concurrent: Timer: Runtime: Parallel: Logger](
     sessionPool: Resource[F, Session[F]]
-  ): F[TokenService[F]] = {
+  ): Resource[F, TokenService[F]] = {
     val config: Config[F, SlackTeamId, Token] = ExpiringCache.Config(Duration(5, MINUTES))
     Cache.expiring[F, SlackTeamId, Token](config).map { cache =>
       new TokenService[F] {
@@ -38,9 +38,15 @@ object TokenService {
             }
           }
 
-        override def findByTeamId(teamId: SlackTeamId): F[Option[Token]] =
-          cache.getOrUpdateOpt(teamId)(sessionPool.flatMap(_.prepare(TokenQueries.findByTeamId)).use(_.option(teamId)))
+        override def findByTeamId(teamId: SlackTeamId): F[Option[Token]] = {
+          Logger[F].info("Call method findByTeamId") *>
+            cache.getOrUpdateOpt(teamId)(
+              Logger[F].info("Retrieve token value from db") *> sessionPool
+                .flatMap(_.prepare(TokenQueries.findByTeamId))
+                .use(_.option(teamId))
+            )
+        }
       }
     }
-  }.use(_.pure[F])
+  }
 }
