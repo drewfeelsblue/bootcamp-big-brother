@@ -20,23 +20,26 @@ trait TokenService[F[_]] {
 }
 
 object TokenService {
-  def make[F[_]: Concurrent: Timer: Runtime: Parallel: Logger](sessionPool: Resource[F, Session[F]]): F[TokenService[F]] = {
-    val config:Config[F, SlackTeamId, Token] = ExpiringCache.Config(Duration(5, MINUTES))
-    Cache.expiring[F, SlackTeamId, Token](config).map { cache => new TokenService[F] {
+  def make[F[_]: Concurrent: Timer: Runtime: Parallel: Logger](
+    sessionPool: Resource[F, Session[F]]
+  ): F[TokenService[F]] = {
+    val config: Config[F, SlackTeamId, Token] = ExpiringCache.Config(Duration(5, MINUTES))
+    Cache.expiring[F, SlackTeamId, Token](config).map { cache =>
+      new TokenService[F] {
         override def save(token: Token): F[Unit] =
           (for {
-            session <- sessionPool
+            session           <- sessionPool
             findPreparedQuery <- session.prepare(TokenQueries.findByTeamId)
             savePreparedQuery <- session.prepare(TokenQueries.save)
           } yield (findPreparedQuery, savePreparedQuery)).use { case (findPreparedQuery, savePreparedQuery) =>
             findPreparedQuery.option(token.teamId) >>= {
               case Some(_) => Sync[F].pure(())
-              case _ => savePreparedQuery.execute(token).void
+              case _       => savePreparedQuery.execute(token).void
             }
           }
 
         override def findByTeamId(teamId: SlackTeamId): F[Option[Token]] =
-            cache.getOrUpdateOpt(teamId)(sessionPool.flatMap(_.prepare(TokenQueries.findByTeamId)).use(_.option(teamId)))
+          cache.getOrUpdateOpt(teamId)(sessionPool.flatMap(_.prepare(TokenQueries.findByTeamId)).use(_.option(teamId)))
       }
     }
   }.use(_.pure[F])

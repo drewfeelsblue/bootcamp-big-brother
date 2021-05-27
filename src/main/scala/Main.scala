@@ -23,8 +23,8 @@ object Main extends IOApp {
       _ <- AppResources.make[IO](dbConfig).use { case AppResources(psql, slackClient) =>
         for {
           services <- Services.make(psql)
-          routes   = HttpApi.routes(services, slackClient, slackAppConfig)
-          _ <- HttpServer.resource(httpServerConfig, routes).use(_ => IO.never)
+          routes    = HttpApi.routes(services, slackClient, slackAppConfig)
+          _        <- HttpServer.resource(httpServerConfig, routes).use(_ => IO.never)
         } yield ()
       }
     } yield ExitCode.Success

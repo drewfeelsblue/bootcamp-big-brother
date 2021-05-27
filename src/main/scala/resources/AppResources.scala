@@ -1,12 +1,12 @@
 package resources
 
-import cats.effect.{ Blocker, Concurrent, ConcurrentEffect, ContextShift, Resource }
+import cats.effect.{Blocker, Concurrent, ConcurrentEffect, ContextShift, Resource}
 import cats.implicits.catsSyntaxTuple2Semigroupal
 import config.DbConfig
 import natchez.Trace.Implicits.noop
 import org.http4s.client.blaze.BlazeClientBuilder
-import org.latestbit.slack.morphism.client.{ SlackApiClient, SlackApiClientT }
-import skunk.{ Session, SessionPool }
+import org.latestbit.slack.morphism.client.{SlackApiClient, SlackApiClientT}
+import skunk.{Session, SessionPool}
 import sttp.client.http4s.Http4sBackend
 
 import scala.concurrent.ExecutionContext
@@ -27,8 +27,8 @@ object AppResources {
       )
 
     val slackApiClient: Resource[F, SlackApiClientT[F]] = for {
-      client <- BlazeClientBuilder[F](ExecutionContext.global).resource
-      blocker <- Blocker[F]
+      client      <- BlazeClientBuilder[F](ExecutionContext.global).resource
+      blocker     <- Blocker[F]
       slackClient <- SlackApiClient.build(Http4sBackend.usingClient(client, blocker)).resource()
     } yield slackClient
 

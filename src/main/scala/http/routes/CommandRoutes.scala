@@ -28,7 +28,11 @@ final class CommandRoutes[F[_]: Concurrent](
     command match {
       case Init(topic, title, channel, creator, responseUrl) =>
         (taskService.save(Task(topic, title, channel, creator)) >>= { taskId =>
-         sendReply(responseUrl, CommandMessage.successInitTask(topic, title, creator, taskId), SlackResponseTypes.InChannel)
+          sendReply(
+            responseUrl,
+            CommandMessage.successInitTask(topic, title, creator, taskId),
+            SlackResponseTypes.InChannel
+          )
         }).start *> Ok()
 
       case Report(channel, responseUrl) =>
@@ -42,7 +46,11 @@ final class CommandRoutes[F[_]: Concurrent](
     }
   }
 
-  private def sendReply(responseUrl: ResponseUrl, responseBlocks: Option[List[SlackBlock]], responseType: String = SlackResponseTypes.Ephemeral) =
+  private def sendReply(
+    responseUrl: ResponseUrl,
+    responseBlocks: Option[List[SlackBlock]],
+    responseType: String = SlackResponseTypes.Ephemeral
+  ) =
     slackApiClient.events
       .reply(
         response_url = responseUrl.value,

@@ -16,6 +16,7 @@ sealed abstract case class Services[F[_]] private (
 
 object Services {
   def make[F[_]: Concurrent: Timer: Parallel: Runtime: Logger](sessionPool: Resource[F, Session[F]]): F[Services[F]] =
-    TokenService.make(sessionPool)
+    TokenService
+      .make(sessionPool)
       .map(new Services[F](_, TaskService.make(sessionPool), ResponseService.make(sessionPool)) {})
 }

@@ -1,7 +1,7 @@
 package http.templates
 
 import org.latestbit.slack.morphism.client.templating.SlackModalViewTemplate
-import org.latestbit.slack.morphism.common.{SlackActionId, SlackBlockId, SlackTriggerId}
+import org.latestbit.slack.morphism.common.{SlackActionId, SlackBlockId}
 import org.latestbit.slack.morphism.messages.{SlackBlock, SlackBlockPlainInputElement, SlackBlockPlainText}
 
 final class PostAnswerModalView(blockId: String) extends SlackModalViewTemplate {
