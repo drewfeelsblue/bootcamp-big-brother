@@ -10,13 +10,11 @@ import org.http4s.server.Router
 import org.http4s.server.middleware.Logger
 import org.latestbit.slack.morphism.client.SlackApiClientT
 
-sealed abstract case class HttpApi[F[_]: org.typelevel.log4cats.Logger] private (
+sealed abstract case class HttpApi[F[_]: Concurrent: org.typelevel.log4cats.Logger] private (
   services: Services[F],
   slackApiClient: SlackApiClientT[F],
   slackAppConfig: SlackAppConfig
-)(implicit c: Concurrent[F])
-    extends CommandMiddleware[F]
-    with InteractionMiddleware[F] {
+) {
   import services._
 
   private val oauthRoutes       = new OAuthRoutes(slackApiClient, tokens, slackAppConfig)
@@ -26,8 +24,8 @@ sealed abstract case class HttpApi[F[_]: org.typelevel.log4cats.Logger] private 
   val routes =
     Logger.httpApp(true, true)(
       Router(
-        "/command"     -> commandMiddleware(c)(commandRoutes.routes),
-        "/interaction" -> interactionMiddleware(c)(interactionRoutes.routes),
+        "/command"     -> CommandMiddleware(commandRoutes.routes),
+        "/interaction" -> InteractionMiddleware(interactionRoutes.routes),
         "/auth"        -> oauthRoutes.routes
       ).orNotFound
     )

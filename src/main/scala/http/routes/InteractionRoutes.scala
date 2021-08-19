@@ -41,8 +41,7 @@ final class InteractionRoutes[F[_]: Concurrent: Logger](
   taskService: TaskService[F],
   responseService: ResponseService[F],
   slackApiClient: SlackApiClientT[F]
-) extends Http4sDsl[F]
-    with InteractionMiddleware[F] {
+) extends Http4sDsl[F] {
   implicit val slackChannelIdOrder: Order[SlackChannelId] = Order.by[SlackChannelId, String](_.value)
 
   val routes = ContextRoutes.of[SlackInteractionEvent, F] { case POST -> Root as event =>

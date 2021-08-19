@@ -6,14 +6,15 @@ import cats.implicits.catsSyntaxTuple4Semigroupal
 import cats.syntax.functor._
 import domain.command.CommandOptions._
 import domain.command.{CommandInitTaskSyntax, CommandOptions, CommandReportSyntax, ResponseUrl}
-import org.http4s.{Request, UrlForm}
+import org.http4s.{ContextRoutes, HttpRoutes, Request, UrlForm}
 import org.http4s.dsl.Http4sDsl
 import org.latestbit.slack.morphism.common.{SlackChannelId, SlackUserId}
 import org.http4s.server.ContextMiddleware
 
-trait CommandMiddleware[F[_]] extends Http4sDsl[F] {
-  private def fetchCommand(implicit S: Sync[F]): Kleisli[OptionT[F, *], Request[F], CommandOptions] = Kleisli {
-    case req @ POST -> Root =>
+object CommandMiddleware {
+  def apply[F[_]: Sync](routes: ContextRoutes[CommandOptions, F]): HttpRoutes[F] = new Http4sDsl[F] {
+
+    def fetchCommand: Kleisli[OptionT[F, *], Request[F], CommandOptions] = Kleisli { case req @ POST -> Root =>
       OptionT.liftF(
         req
           .as[UrlForm]
@@ -32,7 +33,8 @@ trait CommandMiddleware[F[_]] extends Http4sDsl[F] {
             }
           }
       )
-  }
+    }
 
-  def commandMiddleware(implicit S: Sync[F]) = ContextMiddleware(fetchCommand)
+    lazy val res = ContextMiddleware(fetchCommand).apply(routes)
+  }.res
 }
