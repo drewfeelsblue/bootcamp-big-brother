@@ -14,10 +14,10 @@ object Main extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     for {
       (httpServerConfig, dbConfig, slackAppConfig, dbMigrationConfig) <- (
-        Loader[IO, HttpServerConfig]("http.server"),
-        Loader[IO, DbConfig]("db"),
-        Loader[IO, SlackAppConfig]("slack"),
-        Loader[IO, DbMigrationConfig]("db.migration")
+        Loader[HttpServerConfig]("http.server"),
+        Loader[DbConfig]("db"),
+        Loader[SlackAppConfig]("slack"),
+        Loader[DbMigrationConfig]("db.migration")
       ).tupled
       _ <- DbMigration.migrate[IO](dbMigrationConfig)
       _ <- (for {
