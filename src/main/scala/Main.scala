@@ -16,6 +16,6 @@ object Main extends IOApp {
       AppResources(psql, slackClient) <- AppResources.make[IO](appConfig.dbConfig)
       services                        <- Services.resource(psql)
       routes                           = HttpApi.routes(services, slackClient, appConfig.slackAppConfig)
-      server                          <- HttpServer.resource(appConfig.httpServerConfig, routes)
-    } yield server).use(_ => IO.never)
+      _                               <- HttpServer.resource(appConfig.httpServerConfig, routes)
+    } yield ()).use(_ => IO.never)
 }
