@@ -12,5 +12,7 @@ services:
     image: bootcamp-big-brother
     depends_on:
       - db
+    environment:
+      DB_HOST: db
     ports:
       - "9001:9001"
